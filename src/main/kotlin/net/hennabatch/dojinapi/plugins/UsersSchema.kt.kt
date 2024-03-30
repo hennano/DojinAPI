@@ -1,4 +1,4 @@
-package net.hennabatch.plugins
+package net.hennabatch.dojinapi.plugins
 
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction

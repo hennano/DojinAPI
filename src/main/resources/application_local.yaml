@@ -1,0 +1,26 @@
+ktor:
+  development: true
+  application:
+    modules:
+      - net.hennabatch.dojinapi.Application.module
+    deployment:
+      port: 8080
+
+dojinapi:
+  init:
+    cognito:
+      region: ap-northeast-1
+      userPoolName: DojinAPIUserPool
+      endpoint: http://localhost:5000
+      userName: localtest
+      userEmail: localtest@hennabatch.net
+      userPassword: Tes7userp@ssword
+
+
+
+
+  jwt:
+    audience: jwt-audience
+    domain: https://jwt-provider-domain/
+    realm: ktor sample app
+    secret: secret
