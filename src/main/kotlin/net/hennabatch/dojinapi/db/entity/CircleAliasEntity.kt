@@ -1,8 +1,6 @@
 package net.hennabatch.dojinapi.db.entity
 
-import net.hennabatch.dojinapi.db.model.AuthorAlias
 import net.hennabatch.dojinapi.db.model.CircleAlias
-import net.hennabatch.dojinapi.db.table.AuthorAliasTable
 import net.hennabatch.dojinapi.db.table.CircleAliasTable
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
