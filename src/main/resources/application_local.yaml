@@ -15,7 +15,10 @@ dojinapi:
       userName: localtest
       userEmail: localtest@hennabatch.net
       userPassword: Tes7userp@ssword
-
+  db:
+    url: "jdbc:postgresql://localhost:5432/DOJINLIB"
+    userName: "user"
+    password: "localuserpass"
 
 
 

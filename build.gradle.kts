@@ -41,6 +41,7 @@ dependencies {
     implementation("io.ktor:ktor-server-config-yaml")
     implementation("io.ktor:ktor-server-netty-jvm")
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("com.zaxxer:HikariCP:5.1.0")
 
     //AWS
     testImplementation("aws.sdk.kotlin:cognitoidentityprovider:$awssdk_version")

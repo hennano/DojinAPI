@@ -2,6 +2,9 @@ package net.hennabatch.dojinapi.test
 
 import io.kotest.core.spec.style.FunSpec
 import aws.smithy.kotlin.runtime.net.url.Url
+import io.ktor.server.testing.*
+import net.hennabatch.dojinapi.db.DatabaseSingleton
+import net.hennabatch.dojinapi.plugins.configureRouting
 
 class InitTest: FunSpec({
     context("リソース作成"){
@@ -37,7 +40,11 @@ class InitTest: FunSpec({
         }
 
         test("rds"){
-
+            val jdbcUrl = "jdbc:postgresql://localhost:5432/DOJINLIB"
+            val userName = "user"
+            val pass = "localuserpass"
+            DatabaseSingleton.connect(jdbcUrl, userName, pass)
+            InitDB.createAllTable()
         }
     }
 })

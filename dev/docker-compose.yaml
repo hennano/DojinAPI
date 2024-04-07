@@ -6,7 +6,7 @@ services:
     ports:
       - "5000:5000"
   db:
-    build: ./postgreDb/Dockerfile
+    build: ./postgreDb/
     container_name: postgre-db-local
     ports:
       - "5432:5432"
