@@ -4,4 +4,14 @@ services:
     image: motoserver/moto:latest
     container_name: cognito-idp-local
     ports:
-      - 5000:5000
+      - "5000:5000"
+  db:
+    build: ./postgreDb/Dockerfile
+    container_name: postgre-db-local
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: "DOJINLIB"
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'localuserpass'
+      TZ: "Asia/Tokyo"
