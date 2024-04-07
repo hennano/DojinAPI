@@ -2,7 +2,6 @@ package net.hennabatch.dojinapi.test
 
 import io.kotest.core.spec.style.FunSpec
 import aws.smithy.kotlin.runtime.net.url.Url
-import io.kotest.core.annotation.Ignored
 
 class InitTest: FunSpec({
     context("リソース作成"){
