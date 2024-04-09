@@ -25,5 +25,23 @@ class InitDB {
                 SchemaUtils.create(OriginalTable)
             }
         }
+
+        fun dropAllTable(){
+            transaction {
+                SchemaUtils.drop(MAuthorCircleTable)
+                SchemaUtils.drop(MBookCharacters)
+                SchemaUtils.drop(MBookOriginalTable)
+                SchemaUtils.drop(BookTable)
+                SchemaUtils.drop(AuthorAliasTable)
+                SchemaUtils.drop(BookSeriesTable)
+                SchemaUtils.drop(EventTable)
+                SchemaUtils.drop(EventSeriesTable)
+                SchemaUtils.drop(CircleAliasTable)
+                SchemaUtils.drop(CharacterTable)
+                SchemaUtils.drop(CircleTable)
+                SchemaUtils.drop(OriginalTable)
+                SchemaUtils.drop(AuthorTable)
+            }
+        }
     }
 }

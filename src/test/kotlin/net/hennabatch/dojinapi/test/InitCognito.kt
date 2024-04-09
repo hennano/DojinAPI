@@ -2,11 +2,24 @@ package net.hennabatch.dojinapi.test
 
 import aws.sdk.kotlin.services.cognitoidentityprovider.CognitoIdentityProviderClient
 import aws.sdk.kotlin.services.cognitoidentityprovider.model.*
+import aws.sdk.kotlin.services.cognitoidentityprovider.paginators.listUserPoolsPaginated
 import aws.smithy.kotlin.runtime.net.url.Url
+import kotlinx.coroutines.flow.map
+
+import io.ktor.client.HttpClient
+import io.ktor.client.request.post
+
 
 class InitCognito {
 
     companion object{
+
+        suspend fun setSeed(port: Int, seed: Int){
+            HttpClient().use {client ->
+                client.post("http://localhost:$port/moto-api/seed?a=$seed")
+            }
+        }
+
         suspend fun createUserPool(userPoolRegion: String, userPoolName: String, endpointUrl: Url): String?{
             val request = CreateUserPoolRequest {
                 this.poolName = userPoolName
@@ -28,6 +41,35 @@ class InitCognito {
             }.use { cognitoClient ->
                 val createUserPoolResponse = cognitoClient.createUserPool(request)
                 return createUserPoolResponse.userPool?.id
+            }
+        }
+
+        suspend fun getUserPoolId(userPoolRegion: String, userPoolName: String, endpointUrl: Url): String?{
+            val request = ListUserPoolsRequest{
+                maxResults = 10
+            }
+
+            CognitoIdentityProviderClient{
+                region = userPoolRegion
+                this.endpointUrl = endpointUrl
+            }.use { cognitoClient ->
+                val listIdentityPoolsResponse = cognitoClient.listUserPoolsPaginated(request)
+                val userPools = mutableListOf<UserPoolDescriptionType>()
+                listIdentityPoolsResponse.map { it.userPools }.collect{ it?.let { it1 -> userPools.addAll(it1) } }
+                return userPools.find { it.name == userPoolName}?.id
+            }
+        }
+
+        suspend fun deleteUserPool(userPoolRegion: String, userPoolId: String, endpointUrl: Url){
+            val request = DeleteUserPoolRequest{
+                this.userPoolId = userPoolId
+            }
+
+            CognitoIdentityProviderClient {
+                region = userPoolRegion
+                this.endpointUrl = endpointUrl
+            }.use { cognitoClient ->
+                cognitoClient.deleteUserPool(request)
             }
         }
 

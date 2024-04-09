@@ -16,7 +16,7 @@ dojinapi:
       userEmail: localtest@hennabatch.net
       userPassword: Tes7userp@ssword
   db:
-    url: "jdbc:postgresql://localhost:5432/DOJINLIB"
+    url: "jdbc:postgresql://localhost:5432/DOJINLIB?currentSchema=djla"
     userName: "user"
     password: "localuserpass"
 
@@ -24,6 +24,6 @@ dojinapi:
 
   jwt:
     audience: jwt-audience
-    domain: https://jwt-provider-domain/
+    domain: http://localhost:5000/ap-northeast-1_bdd640fb06674ad19c80317fa3b1799d/.well-known/jwks.json
     realm: ktor sample app
     secret: secret

@@ -1,0 +1,2 @@
+\c DOJINLIB
+CREATE SCHEMA djla;

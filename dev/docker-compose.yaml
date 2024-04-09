@@ -10,8 +10,11 @@ services:
     container_name: postgre-db-local
     ports:
       - "5432:5432"
+    volumes:
+      - ./postgreDb/script:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_DB: "DOJINLIB"
+      POSTGRES_SCHEMA: "djla"
       POSTGRES_USER: 'user'
       POSTGRES_PASSWORD: 'localuserpass'
       TZ: "Asia/Tokyo"
