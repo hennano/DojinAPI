@@ -2,28 +2,15 @@ ktor:
   development: true
   application:
     modules:
-      - net.hennabatch.dojinapi.Application.module
+      - net.hennabatch.dojinapi.ApplicationKt.module
     deployment:
       port: 8080
 
 dojinapi:
-  init:
-    cognito:
-      region: ap-northeast-1
-      userPoolName: DojinAPIUserPool
-      endpoint: http://localhost:5000
-      userName: localtest
-      userEmail: localtest@hennabatch.net
-      userPassword: Tes7userp@ssword
   db:
     url: "jdbc:postgresql://localhost:5432/DOJINLIB?currentSchema=djla"
     userName: "user"
     password: "localuserpass"
-
-
-
   jwt:
-    audience: jwt-audience
-    domain: http://localhost:5000/ap-northeast-1_bdd640fb06674ad19c80317fa3b1799d/.well-known/jwks.json
-    realm: ktor sample app
-    secret: secret
+    audience: "tf4sz63y05faqvudp3ao0ogtir"
+    issuer: "https://cognito-idp.ap-northeast-1.amazonaws.com/ap-northeast-1_c40db9b4885f4e6682b6d2c5fa5d3100"

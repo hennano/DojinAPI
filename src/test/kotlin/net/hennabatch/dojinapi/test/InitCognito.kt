@@ -1,6 +1,7 @@
 package net.hennabatch.dojinapi.test
 
 import aws.sdk.kotlin.services.cognitoidentityprovider.CognitoIdentityProviderClient
+import aws.sdk.kotlin.services.cognitoidentityprovider.createUserPoolClient
 import aws.sdk.kotlin.services.cognitoidentityprovider.model.*
 import aws.sdk.kotlin.services.cognitoidentityprovider.paginators.listUserPoolsPaginated
 import aws.smithy.kotlin.runtime.net.url.Url
@@ -45,6 +46,10 @@ class InitCognito {
         }
 
         suspend fun getUserPoolId(userPoolRegion: String, userPoolName: String, endpointUrl: Url): String?{
+            return getUserPools(userPoolRegion, endpointUrl).find { it.name == userPoolName}?.id
+        }
+
+        suspend fun getUserPools(userPoolRegion: String, endpointUrl: Url): List<UserPoolDescriptionType> {
             val request = ListUserPoolsRequest{
                 maxResults = 10
             }
@@ -56,7 +61,7 @@ class InitCognito {
                 val listIdentityPoolsResponse = cognitoClient.listUserPoolsPaginated(request)
                 val userPools = mutableListOf<UserPoolDescriptionType>()
                 listIdentityPoolsResponse.map { it.userPools }.collect{ it?.let { it1 -> userPools.addAll(it1) } }
-                return userPools.find { it.name == userPoolName}?.id
+                return userPools
             }
         }
 
@@ -73,7 +78,22 @@ class InitCognito {
             }
         }
 
-        suspend fun createNewUser(userPoolRegion: String, userPoolId: String, name: String, email: String, endpointUrl: Url) {
+        suspend fun createUserPoolClient(userPoolRegion: String, userPoolId: String, clientName: String,  endpointUrl: Url): String? {
+            val request = CreateUserPoolClientRequest{
+                this.userPoolId = userPoolId
+                this.clientName = clientName
+            }
+
+            CognitoIdentityProviderClient{
+                region = userPoolRegion
+                this.endpointUrl = endpointUrl
+            }.use { cognitoClient ->
+                val response = cognitoClient.createUserPoolClient(request)
+                return response.userPoolClient?.clientId
+            }
+        }
+
+        suspend fun createNewUser(userPoolRegion: String, userPoolId: String, name: String, email: String, endpointUrl: Url): String? {
 
             val attType = AttributeType {
                 this.name = "email"
@@ -93,6 +113,7 @@ class InitCognito {
             }.use { cognitoClient ->
                 val response = cognitoClient.adminCreateUser(request)
                 println("User ${response.user?.username} is created. Status is ${response.user?.userStatus}")
+                return response.user?.userStatus?.value
             }
         }
 
