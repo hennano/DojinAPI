@@ -1,7 +1,6 @@
 package net.hennabatch.dojinapi.test
 
 import aws.sdk.kotlin.services.cognitoidentityprovider.CognitoIdentityProviderClient
-import aws.sdk.kotlin.services.cognitoidentityprovider.createUserPoolClient
 import aws.sdk.kotlin.services.cognitoidentityprovider.model.*
 import aws.sdk.kotlin.services.cognitoidentityprovider.paginators.listUserPoolsPaginated
 import aws.smithy.kotlin.runtime.net.url.Url

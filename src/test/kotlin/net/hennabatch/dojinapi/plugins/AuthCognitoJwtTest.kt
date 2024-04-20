@@ -68,6 +68,7 @@ class AuthCognitoJwtTest: FunSpec({
             id shouldNotBe null
             val clientId = InitCognito.createUserPoolClient(region, id!!, userPoolClientName, endpoint)
             clientId shouldNotBe null
+            logger.info("issuer: $id")
             InitCognito.createNewUser(region, id, cognitoUserName, userEmail, endpoint)
             InitCognito.setPassword(region, id, cognitoUserName, userPassword, endpoint)
             val token = InitCognito.getToken(region, id, clientId!!, cognitoUserName, userPassword, endpoint)

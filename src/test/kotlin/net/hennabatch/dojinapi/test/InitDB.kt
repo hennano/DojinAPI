@@ -3,7 +3,6 @@ package net.hennabatch.dojinapi.test
 import net.hennabatch.dojinapi.db.table.*
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import javax.xml.validation.Schema
 
 class InitDB {
 
@@ -23,6 +22,7 @@ class InitDB {
                 SchemaUtils.create(MBookCharacters)
                 SchemaUtils.create(MBookOriginalTable)
                 SchemaUtils.create(OriginalTable)
+                SchemaUtils.create(AllowFullAccessIpTable)
             }
         }
 
@@ -41,6 +41,7 @@ class InitDB {
                 SchemaUtils.drop(CircleTable)
                 SchemaUtils.drop(OriginalTable)
                 SchemaUtils.drop(AuthorTable)
+                SchemaUtils.drop(AllowFullAccessIpTable)
             }
         }
     }
