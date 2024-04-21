@@ -1,6 +1,8 @@
 package net.hennabatch.dojinapi.db.columntype
 
+import net.hennabatch.dojinapi.db.table.AllowFullAccessIpTable
 import org.jetbrains.exposed.sql.ColumnType
+import org.jetbrains.exposed.sql.Table
 import java.net.InetAddress
 
 class InetColumnType: ColumnType() {
@@ -16,3 +18,7 @@ class InetColumnType: ColumnType() {
         else -> error("Unexpected value of type InetAddress: $value of${value::class.qualifiedName}")
     }
 }
+
+fun Table.inet(name: String) = registerColumn<InetAddress>(name, InetColumnType())
+
+
