@@ -19,7 +19,7 @@ class InitDB {
                 SchemaUtils.create(EventSeriesTable)
                 SchemaUtils.create(EventTable)
                 SchemaUtils.create(MAuthorCircleTable)
-                SchemaUtils.create(MBookCharacters)
+                SchemaUtils.create(MBookCharactersTable)
                 SchemaUtils.create(MBookOriginalTable)
                 SchemaUtils.create(OriginalTable)
                 SchemaUtils.create(AllowFullAccessIpTable)
@@ -29,7 +29,7 @@ class InitDB {
         fun dropAllTable(){
             transaction {
                 SchemaUtils.drop(MAuthorCircleTable)
-                SchemaUtils.drop(MBookCharacters)
+                SchemaUtils.drop(MBookCharactersTable)
                 SchemaUtils.drop(MBookOriginalTable)
                 SchemaUtils.drop(BookTable)
                 SchemaUtils.drop(AuthorAliasTable)
