@@ -11,6 +11,7 @@ class CharacterEntity(id: EntityID<Int>): IntEntity(id) {
     companion object: IntEntityClass<CharacterEntity>(CharacterTable)
 
     val name by CharacterTable.name
+    val memo by CharacterTable.memo
     val original by OriginalEntity via OriginalTable
     val createdAt by CharacterTable.createdAt
     val updatedAt by CharacterTable.updatedAt
@@ -18,6 +19,7 @@ class CharacterEntity(id: EntityID<Int>): IntEntity(id) {
     fun toModel(): Character = Character(
         id = id.value,
         name = name,
+        memo = memo,
         original = original.first().toModel(),
         createdAt = createdAt,
         updatedAt = updatedAt
