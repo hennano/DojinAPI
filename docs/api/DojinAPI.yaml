@@ -575,10 +575,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  event_series:
-                    $ref: '#/components/schemas/Original'
+                $ref: '#/components/schemas/Original'
         401:
           $ref: '#/components/responses/UnauthorizedError'
         404:
@@ -646,13 +643,42 @@ paths:
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  characters:
+                    $ref: '#/components/schemas/CharacterBaseMulti'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/ServerError'
     post:
       operationId: post_character
       summary: キャラクターを新規登録する
       tags: ["character"]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Character'
+            example:
+              name: "古明地さとり"
+              memo: "地霊殿にいる"
+              original: "1"
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterBase'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/ServerError'
+
   /character/{character_id}:
     get:
       operationId: get_character_details
@@ -667,6 +693,16 @@ paths:
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Character'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
     put:
       operationId: update_character_details
       summary: キャラクターの詳細情報を更新する
@@ -677,9 +713,28 @@ paths:
           description: キャラクターID
           schema: {type: string}
           required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Character'
+            example:
+              name: "古明地さとり"
+              memo: "地霊殿にいる"
+              original: "1"
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterBase'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
     delete:
       operationId: delete_character_details
       summary: キャラクターを削除する
@@ -693,6 +748,13 @@ paths:
       responses:
         200:
           description: "成功"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
+
   /book:
     get:
       operationId: get_book_list
@@ -708,6 +770,7 @@ paths:
       responses:
         200:
           description: "成功"
+
   /book/{book_id}:
     get:
       operationId: get_book_details
@@ -748,6 +811,66 @@ paths:
       responses:
         200:
           description: "成功"
+
+  /bookseries:
+    get:
+      operationId: get_book_series_list
+      summary: 同人誌シリーズを取得する
+      tags: ["book"]
+      responses:
+        200:
+          description: "成功"
+    post:
+      operationId: post_series_book
+      summary: 同人誌シリーズを新規登録する
+      tags: ["book"]
+      responses:
+        200:
+          description: "成功"
+
+  /book/{book_series_id}:
+    get:
+      operationId: get_book_series_details
+      summary: 同人誌シリーズの詳細情報を取得する
+      tags: ["book"]
+      parameters:
+        - name: book_series_id
+          in: path
+          description: 同人誌シリーズID
+          schema: {type: string}
+          required: true
+      responses:
+        200:
+          description: "成功"
+    put:
+      operationId: update_series_book_details
+      summary: 同人誌シリーズの詳細情報を更新する
+      tags: ["book"]
+      parameters:
+        - name: book_series_id
+          in: path
+          description: 同人誌シリーズID
+          schema: {type: string}
+          required: true
+      responses:
+        200:
+          description: "成功"
+    delete:
+      operationId: delete_book_series_details
+      summary: 同人誌シリーズを削除する
+      tags: ["book"]
+      parameters:
+        - name: book_series_id
+          in: path
+          description: 同人誌シリーズID
+          schema: {type: string}
+          required: true
+      responses:
+        200:
+          description: "成功"
+
+
+
   /book/{book_id}/image:
     get:
       operationId: get_book_cover_image
@@ -1017,6 +1140,67 @@ components:
         updated_at: 
           type: string
           format: date-time
+    CharacterBase:
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Keyがcharacter_id、Valueがキャラクター名
+      example:
+        1: "古明地さとり"
+    CharacterBaseMulti:
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Keyがcharacter_id、Valueがキャラクター名
+      example:
+        1: "古明地さとり"
+        2: "古明地こいし"
+    Character:
+      type: object
+      properties:
+        name: {type: string}
+        memo: {type: string}
+        original: 
+          $ref: '#/components/schemas/OriginalBase'
+        created_at: 
+          type: string
+          format: date-time
+        updated_at: 
+          type: string
+          format: date-time
+    BookBase:
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Keyがbook_id、Valueが同人誌名
+      example:
+        1: "なんかうすいほん"    
+    BookBaseMulti:
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Keyがbook_id、Valueが同人誌名
+      example:
+        1: "なんかうすいほん"
+        2: "暑くて干からびそう"    
+    Book:
+      type: object
+      properties:
+        name: {type: string}
+        memo: {type: string}
+        original: 
+          $ref: '#/components/schemas/OriginalBase'
+        created_at: 
+          type: string
+          format: date-time
+        updated_at: 
+          type: string
+          format: date-time
+
   securitySchema:
     BearerAuth:
       type: http
