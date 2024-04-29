@@ -521,13 +521,43 @@ paths:
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  event_series:
+                    $ref: '#/components/schemas/OriginalBaseMulti'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/ServerError'
     post:
       operationId: post_original
       summary: 原作を新規登録する
       tags: ["original"]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Original'
+            example:
+              name: "東方"
+              memo: "ゆうめいなやつ"
+              parent_original: "1"
+
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OriginalBase'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/ServerError'
+
   /original/{original_id}:
     get:
       operationId: get_original_details
@@ -542,6 +572,19 @@ paths:
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  event_series:
+                    $ref: '#/components/schemas/Original'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
     put:
       operationId: update_original_details
       summary: 原作の詳細情報を更新する
@@ -552,9 +595,29 @@ paths:
           description: 原作ID
           schema: {type: string}
           required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Original'
+            example:
+              name: "東方"
+              memo: "ゆうめいなやつ"
+              parent_original: "1"
+
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OriginalBase'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
     delete:
       operationId: delete_original_details
       summary: 原作を削除する
@@ -568,6 +631,13 @@ paths:
       responses:
         200:
           description: "成功"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
+
   /character:
     get:
       operationId: get_character_list
@@ -917,8 +987,36 @@ components:
         updated_at: 
           type: string
           format: date-time
-
-
+    OriginalBase:
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Keyがoriginal_id、Valueが原作名
+      example:
+        1: "東方"
+    OriginalBaseMulti:
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Keyがoriginal_id、Valueが原作名
+      example:
+        1: "東方"
+        2: "千年戦争アイギス"
+    Original:
+      type: object
+      properties:
+        name: {type: string}
+        memo: {type: string}
+        parent_original: 
+          $ref: '#/components/schemas/OriginalBase'
+        created_at: 
+          type: string
+          format: date-time
+        updated_at: 
+          type: string
+          format: date-time
   securitySchema:
     BearerAuth:
       type: http
