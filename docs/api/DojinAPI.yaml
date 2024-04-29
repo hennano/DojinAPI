@@ -184,6 +184,7 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         500:
           $ref: '#/components/responses/ServerError'
+
   /circle/{circle_id}:
     get:
       operationId: get_circle_details
@@ -265,6 +266,7 @@ paths:
           $ref: '#/components/responses/NotFoundError'
         500:
           $ref: '#/components/responses/ServerError'
+
   /event:
     get:
       operationId: get_event_list
@@ -280,6 +282,7 @@ paths:
       responses:
         200:
           description: "成功"
+
   /event/{event_id}:
     get:
       operationId: get_event_details
@@ -320,6 +323,7 @@ paths:
       responses:
         200:
           description: "成功"
+
   /eventseries:
     get:
       operationId: get_event_series_list
@@ -328,20 +332,49 @@ paths:
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  event_series:
+                    $ref: '#/components/schemas/EventSeriesBaseMulti'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/ServerError'
     post:
       operationId: post_event_series
       summary: イベントシリーズを新規作成する
       tags: ["event"]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventSeries'
+            example:
+              name: "博麗神社例大祭"
+              memo: "東方系のイベント"
+
       responses:
         200:
           description: "成功"
-  /eventseries/{event_id}:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSeriesBase'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/ServerError'
+  
+  /eventseries/{event_series_id}:
     get:
-      operationId: get_eventseries_details
+      operationId: get_event_series_details
       summary: イベントシリーズの詳細情報を取得する
       tags: ["event"]
       parameters:
-        - name: eventseries_id
+        - name: event_series_id
           in: path
           description: イベントシリーズID
           schema: {type: string}
@@ -349,25 +382,54 @@ paths:
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSeries'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
     put:
-      operationId: update_eventseries_details
+      operationId: update_event_series_details
       summary: イベントシリーズの詳細情報を更新する
       tags: ["event"]
       parameters:
-        - name: eventseries_id
+        - name: event_series_id
           in: path
           description: イベントシリーズID
           schema: {type: string}
           required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventSeries'
+            example:
+              name: "博麗神社例大祭"
+              memo: "東方系のイベント"
+
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSeriesBase'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
     delete:
-      operationId: delete_eventseries_details
+      operationId: delete_event_series_details
       summary: イベントシリーズを削除する
       tags: ["event"]
       parameters:
-        - name: eventseries_id
+        - name: event_series_id
           in: path
           description: イベントシリーズID
           schema: {type: string}
@@ -375,6 +437,12 @@ paths:
       responses:
         200:
           description: "成功"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
 
   /original:
     get:
@@ -691,7 +759,7 @@ components:
       additionalProperties:
         type: string
       description: |
-        Keyがcircle_id、Valueが著者名
+        Keyがcircle_id、Valueがサークル名
       example:
         1: "元素評論部族"
     CircleBaseMulti:
@@ -699,7 +767,7 @@ components:
       additionalProperties:
         type: string
       description: |
-        Keyがcircle_id、Valueが著者名
+        Keyがcircle_id、Valueがサークル名
       example:
         1: "元素評論部族"
         2: "ニセキノコモドキ"
@@ -718,6 +786,36 @@ components:
           $ref: '#/components/schemas/AuthorBaseMulti'
         circle_alias: 
           $ref: '#/components/schemas/CircleBaseMulti'
+    EventSeriesBase:
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Keyがevent_series_id、Valueがイベントシリーズ名
+      example:
+        1: "博麗神社例大祭"
+    EventSeriesBaseMulti:
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Keyがevent_series_id、Valueがイベントシリーズ名
+      example:
+        1: "博麗神社例大祭"
+        2: "割るのです"
+    EventSeries:
+      type: object
+      properties:
+        name: {type: string}
+        memo: {type: string}
+        created_at: 
+          type: string
+          format: date-time
+        updated_at: 
+          type: string
+          format: date-time
+
+
   securitySchema:
     BearerAuth:
       type: http
