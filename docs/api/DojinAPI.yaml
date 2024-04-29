@@ -763,13 +763,52 @@ paths:
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  characters:
+                    $ref: '#/components/schemas/BookBaseMulti'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/ServerError'
     post:
       operationId: post_book
       summary: 同人誌を新規登録する
       tags: ["book"]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+            example:
+              author: "1"
+              circle: "1"
+              series: "1"
+              originals: 
+              - "1"
+              - "2"
+              characters:
+              - "1"
+              - "2"
+              released_event: "1"
+              released_at: "2024-04-29T12:49:22.224Z"
+              purchased_at: "2024-04-29T12:49:22.224Z"
+              name: "なんかうすいほん"
+              memo: "とうほうのうすそうでうすくないほん"
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookBase'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/ServerError'
 
   /book/{book_id}:
     get:
@@ -785,6 +824,16 @@ paths:
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
     put:
       operationId: update_book_details
       summary: 同人誌の詳細情報を更新する
@@ -795,9 +844,39 @@ paths:
           description: 同人誌ID
           schema: {type: string}
           required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+            example:
+              author: "1"
+              circle: "1"
+              series: "1"
+              originals: 
+              - "1"
+              - "2"
+              characters:
+              - "1"
+              - "2"
+              released_event: "1"
+              released_at: "2024-04-29T12:49:22.224Z"
+              purchased_at: "2024-04-29T12:49:22.224Z"
+              name: "なんかうすいほん"
+              memo: "とうほうのうすそうでうすくないほん"
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookBase'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
     delete:
       operationId: delete_book_details
       summary: 同人誌を削除する
@@ -811,6 +890,12 @@ paths:
       responses:
         200:
           description: "成功"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
 
   /bookseries:
     get:
@@ -932,8 +1017,6 @@ paths:
           $ref: '#/components/responses/NotFoundError'
         500:
           $ref: '#/components/responses/ServerError'
-
-
 
   /book/{book_id}/image:
     get:
@@ -1254,10 +1337,26 @@ components:
     Book:
       type: object
       properties:
+        author:
+          $ref: '#/components/schemas/AuthorBase'
+        circle:
+          $ref: '#/components/schemas/CircleBase'
+        series:
+          $ref: '#/components/schemas/BookSeriesBase'
+        originals:
+          $ref: '#/components/schemas/OriginalBaseMulti'
+        characters: 
+          $ref: '#/components/schemas/CharacterBaseMulti'
+        released_event:
+          $ref: '#/components/schemas/EventBase'
+        released_at:
+          type: string
+          format: date-time
+        purchased_at:
+          type: string
+          format: date-time
         name: {type: string}
         memo: {type: string}
-        original: 
-          $ref: '#/components/schemas/OriginalBase'
         created_at: 
           type: string
           format: date-time
@@ -1291,8 +1390,6 @@ components:
         updated_at: 
           type: string
           format: date-time
-
-
 
   securitySchema:
     BearerAuth:
