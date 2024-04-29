@@ -820,15 +820,42 @@ paths:
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  characters:
+                    $ref: '#/components/schemas/BookSeriesBaseMulti'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/ServerError'
     post:
       operationId: post_series_book
       summary: 同人誌シリーズを新規登録する
       tags: ["book"]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookSeries'
+            example:
+              name: "うすいほんしりーず"
+              original: "1"
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookSeriesBase'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/ServerError'
 
-  /book/{book_series_id}:
+  /bookseries/{book_series_id}:
     get:
       operationId: get_book_series_details
       summary: 同人誌シリーズの詳細情報を取得する
@@ -842,6 +869,19 @@ paths:
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  characters:
+                    $ref: '#/components/schemas/BookSeries'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
     put:
       operationId: update_series_book_details
       summary: 同人誌シリーズの詳細情報を更新する
@@ -852,9 +892,27 @@ paths:
           description: 同人誌シリーズID
           schema: {type: string}
           required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookSeries'
+            example:
+              name: "うすいほんしりーず"
+              original: "1"
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookSeriesBase'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
     delete:
       operationId: delete_book_series_details
       summary: 同人誌シリーズを削除する
@@ -868,6 +926,12 @@ paths:
       responses:
         200:
           description: "成功"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
 
 
 
@@ -1186,7 +1250,7 @@ components:
         Keyがbook_id、Valueが同人誌名
       example:
         1: "なんかうすいほん"
-        2: "暑くて干からびそう"    
+        2: "暑くて干からびそう"
     Book:
       type: object
       properties:
@@ -1200,6 +1264,35 @@ components:
         updated_at: 
           type: string
           format: date-time
+    BookSeriesBase:
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Keyがbook_series_id、Valueが同人誌シリーズ名
+      example:
+        1: "うすいほんしりーず" 
+    BookSeriesBaseMulti:
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Keyがbook_series_id、Valueが同人誌シリーズ名
+      example:
+        1: "うすいほんしりーず" 
+        2: "暑くて干からびそうシリーズ"
+    BookSeries:
+      type: object
+      properties:
+        name: {type: string}
+        created_at: 
+          type: string
+          format: date-time
+        updated_at: 
+          type: string
+          format: date-time
+
+
 
   securitySchema:
     BearerAuth:
