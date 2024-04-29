@@ -275,13 +275,44 @@ paths:
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    $ref: '#/components/schemas/EventBaseMulti'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/ServerError'
     post:
       operationId: post_event
       summary: イベントを新規登録する
       tags: ["event"]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+            example:
+              name: "第一回博麗神社例大祭"
+              memo: "東方イベント"
+              held_at: "2024-04-29T08:24:16.571Z"
+              location: "東京ビックサイト"
+              event_series: "1"
+
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventBase'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/ServerError'
 
   /event/{event_id}:
     get:
@@ -297,6 +328,16 @@ paths:
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
     put:
       operationId: update_event_details
       summary: イベントの詳細情報を更新する
@@ -307,9 +348,31 @@ paths:
           description: イベントID
           schema: {type: string}
           required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+            example:
+              name: "第一回博麗神社例大祭"
+              memo: "東方イベント"
+              held_at: "2024-04-29T08:24:16.571Z"
+              location: "東京ビックサイト"
+              event_series: "1"
+
       responses:
         200:
           description: "成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventBase'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
     delete:
       operationId: delete_event_details
       summary: イベントを削除する
@@ -323,6 +386,12 @@ paths:
       responses:
         200:
           description: "成功"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
 
   /eventseries:
     get:
@@ -786,6 +855,40 @@ components:
           $ref: '#/components/schemas/AuthorBaseMulti'
         circle_alias: 
           $ref: '#/components/schemas/CircleBaseMulti'
+    EventBase:
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Keyがevent_id、Valueがイベント名
+      example:
+        1: "第一回博麗神社例大祭"
+    EventBaseMulti:
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Keyがevent_id、Valueがイベント名
+      example:
+        1: "第一回博麗神社例大祭"
+        2: "第二回博麗神社例大祭"
+    Event:
+      type: object
+      properties:
+        name: {type: string}
+        memo: {type: string}
+        heldAt:
+          type: string
+          format: date-time
+        location: {type: string}
+        created_at: 
+          type: string
+          format: date-time
+        updated_at: 
+          type: string
+          format: date-time
+        event_series:
+          $ref: '#/components/schemas/EventSeriesBase'
     EventSeriesBase:
       type: object
       additionalProperties:
