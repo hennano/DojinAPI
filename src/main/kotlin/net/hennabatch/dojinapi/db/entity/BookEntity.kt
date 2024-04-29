@@ -13,7 +13,7 @@ class BookEntity(id: EntityID<Int>) : IntEntity(id) {
     val circle by CircleEntity via CircleTable
     val series by BookSeriesEntity via BookSeriesTable
     val originals by OriginalEntity via MBookOriginalTable
-    val characters by CharacterEntity via MBookCharactersTable
+    val characters by CharacterEntity via MBookCharacterTable
     val releasedEvent by EventEntity via EventTable
     val releasedAt by BookTable.releasedAt
     val purchasedAt by BookTable.purchasedAt
