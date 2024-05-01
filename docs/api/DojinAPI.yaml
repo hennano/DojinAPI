@@ -1521,10 +1521,10 @@ components:
           type: string
           format: date-time
 
-  securitySchema:
+  securitySchemes:
     BearerAuth:
       type: http
-      schema: bearer
+      scheme: bearer
       bearerFormat: JWT
     
   
