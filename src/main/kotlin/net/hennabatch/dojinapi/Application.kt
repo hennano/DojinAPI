@@ -6,7 +6,7 @@ import io.ktor.server.netty.*
 import net.hennabatch.dojinapi.db.DatabaseSingleton
 import net.hennabatch.dojinapi.plugins.configureDatabases
 import net.hennabatch.dojinapi.plugins.configureRouting
-import net.hennabatch.dojinapi.plugins.configureSecurity
+import net.hennabatch.dojinapi.security.configureAuthCognitoSecurity
 import net.hennabatch.dojinapi.plugins.configureSerialization
 
 fun main(args: Array<String>) {
@@ -21,6 +21,6 @@ fun Application.module() {
     DatabaseSingleton.init(environment.config)
     configureSerialization()
     configureDatabases()
-    configureSecurity()
+    configureAuthCognitoSecurity()
     configureRouting()
 }

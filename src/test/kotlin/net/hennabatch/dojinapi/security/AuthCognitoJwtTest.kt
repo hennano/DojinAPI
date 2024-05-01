@@ -1,4 +1,4 @@
-package net.hennabatch.dojinapi.plugins
+package net.hennabatch.dojinapi.security
 
 import aws.smithy.kotlin.runtime.net.url.Url
 import com.auth0.jwk.JwkProviderBuilder

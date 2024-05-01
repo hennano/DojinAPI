@@ -1,4 +1,4 @@
-package net.hennabatch.dojinapi.plugins
+package net.hennabatch.dojinapi.security
 
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
@@ -8,7 +8,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
 
-fun Application.configureSecurity() {
+fun Application.configureAuthCognitoSecurity() {
     val jwtAudience = environment.config.property("dojinapi.jwt.audience").getString()
     val jwtIssuer  = environment.config.property("dojinapi.jwt.issuer").getString()
     install(Authentication){
