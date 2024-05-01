@@ -1021,7 +1021,9 @@ paths:
   /book/{book_id}/image:
     get:
       operationId: get_book_cover_image
-      summary: 同人誌の表紙画像を取得する
+      summary: |
+        同人誌の表紙画像を取得する
+        /book/{book_id}/image/1と同じ
       tags: ["book"]
       parameters:
         - name: book_id
@@ -1032,6 +1034,39 @@ paths:
       responses:
         200:
           description: "成功"
+          content:
+            image/png:
+              schema: 
+               type: string
+               format: binary
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: delete_book_all_images
+      summary: 同人誌の画像をすべて削除する
+      tags: ["book"]
+      parameters:
+        - name: book_id
+          in: path
+          description: 同人誌ID
+          schema: {type: string}
+          required: true
+      responses:
+        200:
+          description: "成功"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
+
   /book/{book_id}/image/{page}:
     get:
       operationId: get_book_image
@@ -1051,6 +1086,19 @@ paths:
       responses:
         200:
           description: "成功"
+          content:
+            image/png:
+              schema: 
+               type: string
+               format: binary
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
     post:
       operationId: put_book_image
       summary: 同人誌の画像をアップロードする
@@ -1069,6 +1117,10 @@ paths:
       responses:
         200:
           description: "成功"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/ServerError'
     put:
       operationId: update_book_image
       summary: 同人誌の画像を更新する
@@ -1087,6 +1139,12 @@ paths:
       responses:
         200:
           description: "成功"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
     delete:
       operationId: delete_book_image
       summary: 同人誌の画像を削除する
@@ -1105,15 +1163,87 @@ paths:
       responses:
         200:
           description: "成功"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/ServerError'
+
   /book/search:
     get:
       operationId: search_book
       summary: 同人誌を検索する
       tags: ["book"]
+      parameters:
+        - name: author
+          in: query
+          description: 著者名(部分一致)
+          schema:
+            type: string
+            format: byte
+        - name: circle
+          in: query
+          description: サークル名(部分一致)
+          schema:
+            type: string
+            format: byte 
+        - name: event
+          in: query
+          description: イベント名(部分一致)
+          schema:
+            type: string
+            format: byte
+        - name: original
+          in: query
+          description: 原作名(部分一致)
+          schema:
+            type: string
+            format: byte
+        - name: character
+          in: query
+          description: キャラクター名(部分一致)
+          schema:
+            type: string
+            format: byte
+        - name: released_from
+          in: query
+          description: リリース日範囲From
+          schema:
+            type: string
+            pattern: "YYYYMMDD"
+        - name: released_to
+          in: query
+          description: リリース日範囲To
+          schema:
+            type: string
+            pattern: "YYYYMMDD"
+        - name: purchased_from
+          in: query
+          description: 購入日範囲From
+          schema:
+            type: string
+            pattern: "YYYYMMDD"
+        - name: purchased_to
+          in: query
+          description: 購入日範囲To
+          schema:
+            type: string
+            pattern: "YYYYMMDD"
       responses:
         200:
           description: "成功"
-
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  characters:
+                    $ref: '#/components/schemas/BookBaseMulti'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/ServerError'
 
 
 tags:
@@ -1396,9 +1526,13 @@ components:
       type: http
       schema: bearer
       bearerFormat: JWT
+    
+  
   responses:
     UnauthorizedError:
       description: トークンが無効もしくは期限切れ
+    ForbiddenError:
+      description: アクセス拒否
     NotFoundError:
       description: 存在しない
     ServerError:
