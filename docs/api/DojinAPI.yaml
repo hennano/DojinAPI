@@ -12,7 +12,8 @@ paths:
   /author:
     get:
       operationId: get_auther_list
-      summary: 著者リストを取得する
+      summary: getAuthorList
+      description: 著者リストを取得する
       tags: ["author"]
       responses:
         200:
@@ -29,8 +30,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     post:
-      operationId: post_author
-      summary: 著者を新規登録する
+      operationId: create_author
+      summary: createAuthor
+      description: 著者を新規登録する
       tags: ["author"]
       requestBody:
         content:
@@ -58,8 +60,9 @@ paths:
 
   /author/{author_id}:
     get:
-      operationId: get_author_details
-      summary: 著者の詳細情報を取得する
+      operationId: get_author
+      summary: getAuthor
+      description: 著者情報を取得する
       tags: ["author"]
       parameters:
         - name: author_id
@@ -81,8 +84,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     put:
-      operationId: update_author_details
-      summary: 著者の詳細情報を更新する
+      operationId: update_author
+      summary: updateAuthor
+      description: 著者情報を更新する
       tags: ["author"]
       parameters:
         - name: author_id
@@ -116,8 +120,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     delete:
-      operationId: delete_author_details
-      summary: 著者を削除する
+      operationId: delete_author
+      summary: deleteAuthor
+      description: 著者情報を削除する
       tags: ["author"]
       parameters:
         - name: author_id
@@ -138,7 +143,8 @@ paths:
   /circle:
     get:
       operationId: get_circle_list
-      summary: サークルリストを取得する
+      summary: getCirlceList
+      description: サークルリストを取得する
       tags: ["circle"]
       responses:
         200:
@@ -155,8 +161,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     post:
-      operationId: post_circle
-      summary: サークルを新規登録する
+      operationId: create_circle
+      summary: createCircle
+      description: サークルを新規登録する
       tags: ["circle"]
       requestBody:
         content:
@@ -187,8 +194,9 @@ paths:
 
   /circle/{circle_id}:
     get:
-      operationId: get_circle_details
-      summary: サークルの詳細情報を取得する
+      operationId: get_circle
+      summary: getCircle
+      description: サークル情報を取得する
       tags: ["circle"]
       parameters:
         - name: circle_id
@@ -210,8 +218,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     put:
-      operationId: update_circle_details
-      summary: サークルの詳細情報を更新する
+      operationId: update_circle
+      summary: updateCircle
+      description: サークル情報を更新する
       tags: ["circle"]
       parameters:
         - name: circle_id
@@ -248,8 +257,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     delete:
-      operationId: delete_circle_details
-      summary: サークルを削除する
+      operationId: delete_circle
+      summary: deleteCircle
+      description: サークルを削除する
       tags: ["circle"]
       parameters:
         - name: circle_id
@@ -270,7 +280,8 @@ paths:
   /event:
     get:
       operationId: get_event_list
-      summary: イベントリストを取得する
+      summary: getEventList
+      description: イベントリストを取得する
       tags: ["event"]
       responses:
         200:
@@ -287,8 +298,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     post:
-      operationId: post_event
-      summary: イベントを新規登録する
+      operationId: create_event
+      summary: createEvent
+      description: イベントを新規登録する
       tags: ["event"]
       requestBody:
         content:
@@ -316,8 +328,9 @@ paths:
 
   /event/{event_id}:
     get:
-      operationId: get_event_details
-      summary: イベントの詳細情報を取得する
+      operationId: get_event
+      summary: getEvent
+      description: イベント情報を取得する
       tags: ["event"]
       parameters:
         - name: event_id
@@ -339,8 +352,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     put:
-      operationId: update_event_details
-      summary: イベントの詳細情報を更新する
+      operationId: update_event
+      summary: updateEvent
+      description: イベント情報を更新する
       tags: ["event"]
       parameters:
         - name: event_id
@@ -374,8 +388,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     delete:
-      operationId: delete_event_details
-      summary: イベントを削除する
+      operationId: delete_event
+      summary: deleteEvent
+      description: イベントを削除する
       tags: ["event"]
       parameters:
         - name: event_id
@@ -396,7 +411,8 @@ paths:
   /eventseries:
     get:
       operationId: get_event_series_list
-      summary: イベントシリーズリストを取得する
+      summary: getEventSeriesList
+      description: イベントシリーズリストを取得する
       tags: ["event"]
       responses:
         200:
@@ -413,8 +429,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     post:
-      operationId: post_event_series
-      summary: イベントシリーズを新規作成する
+      operationId: create_event_series
+      summary: createEventSeries
+      description: イベントシリーズを新規作成する
       tags: ["event"]
       requestBody:
         content:
@@ -439,8 +456,9 @@ paths:
   
   /eventseries/{event_series_id}:
     get:
-      operationId: get_event_series_details
-      summary: イベントシリーズの詳細情報を取得する
+      operationId: get_event_series
+      summary: getEventSeries
+      description: イベントシリーズ情報を取得する
       tags: ["event"]
       parameters:
         - name: event_series_id
@@ -462,8 +480,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     put:
-      operationId: update_event_series_details
-      summary: イベントシリーズの詳細情報を更新する
+      operationId: update_event_series
+      summary: updateEventSeries
+      description: イベントシリーズ情報を更新する
       tags: ["event"]
       parameters:
         - name: event_series_id
@@ -494,8 +513,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     delete:
-      operationId: delete_event_series_details
-      summary: イベントシリーズを削除する
+      operationId: delete_event_series
+      summary: deleteEventSeries
+      description: イベントシリーズを削除する
       tags: ["event"]
       parameters:
         - name: event_series_id
@@ -516,7 +536,8 @@ paths:
   /original:
     get:
       operationId: get_original_list
-      summary: 原作リストを取得する
+      summary: getOriginalList
+      description: 原作リストを取得する
       tags: ["original"]
       responses:
         200:
@@ -533,8 +554,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     post:
-      operationId: post_original
-      summary: 原作を新規登録する
+      operationId: create_original
+      summary: createOriginal
+      description: 原作を新規登録する
       tags: ["original"]
       requestBody:
         content:
@@ -560,8 +582,9 @@ paths:
 
   /original/{original_id}:
     get:
-      operationId: get_original_details
-      summary: 原作の詳細情報を取得する
+      operationId: get_original
+      summary: getOriginal
+      description: 原作情報を取得する
       tags: ["original"]
       parameters:
         - name: original_id
@@ -583,8 +606,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     put:
-      operationId: update_original_details
-      summary: 原作の詳細情報を更新する
+      operationId: update_original
+      summary: updateOriginal
+      description: 原作の詳細情報を更新する
       tags: ["original"]
       parameters:
         - name: original_id
@@ -616,8 +640,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     delete:
-      operationId: delete_original_details
-      summary: 原作を削除する
+      operationId: delete_original
+      summary: deleteOriginal
+      description: 原作を削除する
       tags: ["original"]
       parameters:
         - name: original_id
@@ -638,7 +663,8 @@ paths:
   /character:
     get:
       operationId: get_character_list
-      summary: キャラクターリストを取得する
+      summary: getCharacterList
+      description: キャラクターリストを取得する
       tags: ["character"]
       responses:
         200:
@@ -655,8 +681,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     post:
-      operationId: post_character
-      summary: キャラクターを新規登録する
+      operationId: create_character
+      summary: createCharacter
+      description: キャラクターを新規登録する
       tags: ["character"]
       requestBody:
         content:
@@ -681,8 +708,9 @@ paths:
 
   /character/{character_id}:
     get:
-      operationId: get_character_details
-      summary: キャラクターの詳細情報を取得する
+      operationId: get_character
+      summary: getCharacter
+      description: キャラクター情報を取得する
       tags: ["character"]
       parameters:
         - name: character_id
@@ -704,8 +732,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     put:
-      operationId: update_character_details
-      summary: キャラクターの詳細情報を更新する
+      operationId: update_character
+      summary: updateCharacter
+      description: キャラクター情報を更新する
       tags: ["character"]
       parameters:
         - name: character_id
@@ -736,8 +765,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     delete:
-      operationId: delete_character_details
-      summary: キャラクターを削除する
+      operationId: delete_character
+      summary: deleteCharacter
+      description: キャラクターを削除する
       tags: ["character"]
       parameters:
         - name: character_id
@@ -758,7 +788,8 @@ paths:
   /book:
     get:
       operationId: get_book_list
-      summary: 同人誌を取得する
+      summary: getBookList
+      description: 同人誌を取得する
       tags: ["book"]
       responses:
         200:
@@ -775,8 +806,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     post:
-      operationId: post_book
-      summary: 同人誌を新規登録する
+      operationId: create_book
+      summary: createBook
+      description: 同人誌を新規登録する
       tags: ["book"]
       requestBody:
         content:
@@ -812,8 +844,9 @@ paths:
 
   /book/{book_id}:
     get:
-      operationId: get_book_details
-      summary: 同人誌の詳細情報を取得する
+      operationId: get_book
+      summary: getBook
+      description: 同人誌情報を取得する
       tags: ["book"]
       parameters:
         - name: book_id
@@ -835,8 +868,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     put:
-      operationId: update_book_details
-      summary: 同人誌の詳細情報を更新する
+      operationId: update_book
+      summary: updateBook
+      description: 同人誌情報を更新する
       tags: ["book"]
       parameters:
         - name: book_id
@@ -878,8 +912,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     delete:
-      operationId: delete_book_details
-      summary: 同人誌を削除する
+      operationId: delete_book
+      summary: deleteBook
+      description: 同人誌を削除する
       tags: ["book"]
       parameters:
         - name: book_id
@@ -900,7 +935,8 @@ paths:
   /bookseries:
     get:
       operationId: get_book_series_list
-      summary: 同人誌シリーズを取得する
+      summary: getBookSeriesList
+      description: 同人誌シリーズを取得する
       tags: ["book"]
       responses:
         200:
@@ -917,8 +953,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     post:
-      operationId: post_series_book
-      summary: 同人誌シリーズを新規登録する
+      operationId: create_book_series
+      summary: createBookSeries
+      description: 同人誌シリーズを新規登録する
       tags: ["book"]
       requestBody:
         content:
@@ -942,8 +979,9 @@ paths:
 
   /bookseries/{book_series_id}:
     get:
-      operationId: get_book_series_details
-      summary: 同人誌シリーズの詳細情報を取得する
+      operationId: get_book_series
+      summary: getBookSeries
+      description: 同人誌シリーズ情報を取得する
       tags: ["book"]
       parameters:
         - name: book_series_id
@@ -968,8 +1006,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     put:
-      operationId: update_series_book_details
-      summary: 同人誌シリーズの詳細情報を更新する
+      operationId: update_series_book
+      summary: updateSeriesBook
+      description: 同人誌シリーズ情報を更新する
       tags: ["book"]
       parameters:
         - name: book_series_id
@@ -999,8 +1038,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     delete:
-      operationId: delete_book_series_details
-      summary: 同人誌シリーズを削除する
+      operationId: delete_book_series
+      summary: deleteBookSeries
+      description: 同人誌シリーズを削除する
       tags: ["book"]
       parameters:
         - name: book_series_id
@@ -1021,7 +1061,8 @@ paths:
   /book/{book_id}/image:
     get:
       operationId: get_book_cover_image
-      summary: |
+      summary: getBookCoverImage
+      description: |
         同人誌の表紙画像を取得する
         /book/{book_id}/image/1と同じ
       tags: ["book"]
@@ -1049,7 +1090,8 @@ paths:
           $ref: '#/components/responses/ServerError'
     delete:
       operationId: delete_book_all_images
-      summary: 同人誌の画像をすべて削除する
+      summary: deleteBookAllImages
+      description: 同人誌の画像をすべて削除する
       tags: ["book"]
       parameters:
         - name: book_id
@@ -1070,7 +1112,8 @@ paths:
   /book/{book_id}/image/{page}:
     get:
       operationId: get_book_image
-      summary: 同人誌の画像を取得する
+      summary: getBookImage
+      description: 同人誌の画像を取得する
       tags: ["book"]
       parameters:
         - name: book_id
@@ -1100,8 +1143,9 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
     post:
-      operationId: put_book_image
-      summary: 同人誌の画像をアップロードする
+      operationId: upload_book_image
+      summary: uploadBookImage
+      description: 同人誌の画像をアップロードする
       tags: ["book"]
       parameters:
         - name: book_id
@@ -1123,7 +1167,8 @@ paths:
           $ref: '#/components/responses/ServerError'
     put:
       operationId: update_book_image
-      summary: 同人誌の画像を更新する
+      summary: updateBookImage
+      description: 同人誌の画像を更新する
       tags: ["book"]
       parameters:
         - name: book_id
@@ -1147,7 +1192,8 @@ paths:
           $ref: '#/components/responses/ServerError'
     delete:
       operationId: delete_book_image
-      summary: 同人誌の画像を削除する
+      summary: deleteBookImage
+      description: 同人誌の画像を削除する
       tags: ["book"]
       parameters:
         - name: book_id
@@ -1172,8 +1218,9 @@ paths:
 
   /book/search:
     get:
-      operationId: search_book
-      summary: 同人誌を検索する
+      operationId: search_books
+      summary: searchBooks
+      description: 同人誌を検索する
       tags: ["book"]
       parameters:
         - name: author
