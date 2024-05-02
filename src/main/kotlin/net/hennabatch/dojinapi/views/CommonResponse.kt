@@ -3,6 +3,7 @@ package net.hennabatch.dojinapi.views
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
+import net.hennabatch.dojinapi.views.entity.ResponseBody
 import net.hennabatch.dojinapi.views.entity.ResponseEntity
 
 class CommonResponse {
@@ -11,7 +12,15 @@ class CommonResponse {
         response.headers.entries.forEach{
             call.response.headers.append(it.key, it.value)
         }
-        call.respond(HttpStatusCode.OK, response.responseBody)
+        when(val body = response.responseBody){
+            is ResponseBody.MapBody ->{
+                call.respond(HttpStatusCode.OK, body.value)
+            }
+            is ResponseBody.FileBody -> {
+                call.respond(HttpStatusCode.OK, body.value)
+            }
+        }
+
     }
 
     private suspend fun showErrorResponse(call: ApplicationCall, statusCode: HttpStatusCode, errorMessage: String){
