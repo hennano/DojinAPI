@@ -40,6 +40,7 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jwt-jvm")
     implementation("io.ktor:ktor-server-config-yaml")
     implementation("io.ktor:ktor-server-netty-jvm")
+    implementation("io.ktor:ktor-server-resources")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("com.zaxxer:HikariCP:5.1.0")
 

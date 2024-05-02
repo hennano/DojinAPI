@@ -15,7 +15,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.mockk.*
-import net.hennabatch.dojinapi.common.util.logger
+import net.hennabatch.dojinapi.common.utils.logger
 import net.hennabatch.dojinapi.test.InitCognito
 import kotlin.test.assertEquals
 
