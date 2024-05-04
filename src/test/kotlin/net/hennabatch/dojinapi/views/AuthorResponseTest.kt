@@ -8,6 +8,7 @@ import io.kotest.matchers.maps.shouldContain
 import io.kotest.matchers.maps.shouldHaveSize
 import io.kotest.matchers.maps.shouldNotContain
 import io.ktor.http.*
+import kotlinx.serialization.json.JsonPrimitive
 import net.hennabatch.dojinapi.db.model.Author
 import net.hennabatch.dojinapi.views.entity.ResponseBody
 
@@ -28,11 +29,11 @@ class AuthorResponseTest : FunSpec({
             res.statusCode shouldBeEqual HttpStatusCode.OK
             res.headers.shouldBeEmpty()
             when(val body = res.responseBody){
-                is ResponseBody.MapBody ->{
+                is ResponseBody.JsonBody ->{
                     body.value shouldHaveSize 3
-                    body.value.shouldContain("1", "test1")
-                    body.value.shouldContain("2", "test2")
-                    body.value.shouldContain("3", "test3")
+                    body.value.shouldContain("1", JsonPrimitive("test1"))
+                    body.value.shouldContain("2", JsonPrimitive("test2"))
+                    body.value.shouldContain("3", JsonPrimitive("test3"))
                 }
                 else ->{
                     fail("ResponseBody.MapBody以外が指定されている")
@@ -54,11 +55,11 @@ class AuthorResponseTest : FunSpec({
             res.statusCode shouldBeEqual HttpStatusCode.OK
             res.headers.shouldBeEmpty()
             when(val body = res.responseBody){
-                is ResponseBody.MapBody ->{
+                is ResponseBody.JsonBody ->{
                     body.value shouldHaveSize 2
-                    body.value.shouldContain("1", "test1")
-                    body.value.shouldNotContain("2", "test2")
-                    body.value.shouldContain("3", "test3")
+                    body.value.shouldContain("1", JsonPrimitive("test1"))
+                    body.value.shouldNotContain("2", JsonPrimitive("test2"))
+                    body.value.shouldContain("3", JsonPrimitive("test3"))
                 }
                 else ->{
                     fail("ResponseBody.MapBody以外が指定されている")
@@ -77,7 +78,7 @@ class AuthorResponseTest : FunSpec({
             res.statusCode shouldBeEqual HttpStatusCode.OK
             res.headers.shouldBeEmpty()
             when(val body = res.responseBody){
-                is ResponseBody.MapBody ->{
+                is ResponseBody.JsonBody ->{
                     body.value.shouldBeEmpty()
                 }
                 else ->{

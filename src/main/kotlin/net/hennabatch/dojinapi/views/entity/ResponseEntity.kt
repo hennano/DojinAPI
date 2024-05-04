@@ -1,6 +1,7 @@
 package net.hennabatch.dojinapi.views.entity
 
 import io.ktor.http.*
+import kotlinx.serialization.json.JsonObject
 import java.io.File
 
 data class ResponseEntity(
@@ -10,6 +11,6 @@ data class ResponseEntity(
 )
 
 sealed class ResponseBody{
-    data class MapBody(val value: Map<String, Any>): ResponseBody()
+    data class JsonBody(val value: JsonObject): ResponseBody()
     data class FileBody(val value: File): ResponseBody()
 }

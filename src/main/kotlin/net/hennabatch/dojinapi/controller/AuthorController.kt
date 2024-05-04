@@ -1,4 +1,4 @@
-package net.hennabatch.dojinapi.controllers
+package net.hennabatch.dojinapi.controller
 
 import io.ktor.resources.*
 import io.ktor.server.application.*
@@ -8,13 +8,13 @@ import io.ktor.util.logging.*
 import net.hennabatch.dojinapi.logic.AuthorControllerLogic
 import net.hennabatch.dojinapi.views.AuthorResponse
 import net.hennabatch.dojinapi.views.CommonResponse
+import org.koin.ktor.ext.inject
 
 fun Route.authorController(){
 
-    val authorControllerLogic = AuthorControllerLogic()
-    val authorResponse = AuthorResponse()
-    val commonResponse = CommonResponse()
-
+    val authorControllerLogic by inject<AuthorControllerLogic>()
+    val authorResponse by inject<AuthorResponse>()
+    val commonResponse by inject<CommonResponse>()
 
     @Resource("/author")
     class AuthorLocation()

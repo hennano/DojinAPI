@@ -13,7 +13,7 @@ class CommonResponse {
             call.response.headers.append(it.key, it.value)
         }
         when(val body = response.responseBody){
-            is ResponseBody.MapBody ->{
+            is ResponseBody.JsonBody ->{
                 call.respond(HttpStatusCode.OK, body.value)
             }
             is ResponseBody.FileBody -> {
