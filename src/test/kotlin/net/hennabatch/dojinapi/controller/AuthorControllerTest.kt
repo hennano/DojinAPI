@@ -15,10 +15,6 @@ import net.hennabatch.dojinapi.common.utils.logger
 import net.hennabatch.dojinapi.db.model.Author
 import net.hennabatch.dojinapi.logic.AuthorControllerLogic
 import net.hennabatch.dojinapi.views.AuthorResponse
-import net.hennabatch.dojinapi.views.CommonResponse
-import net.hennabatch.dojinapi.views.entity.ResponseBody
-import net.hennabatch.dojinapi.views.entity.ResponseEntity
-import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 class AuthorControllerTest: FunSpec({
@@ -38,13 +34,11 @@ class AuthorControllerTest: FunSpec({
             val authorControllerLogicMock = mockk<AuthorControllerLogic>{
                 coEvery { fetchAllAuthors()} returns authors
             }
-            val res = ResponseEntity(
-                statusCode = HttpStatusCode.OK,
-                responseBody = ResponseBody.JsonBody(JsonObject(mapOf(
+            val res = JsonObject(mapOf(
                     "1" to JsonPrimitive("test1"),
                     "2" to JsonPrimitive("test2"),
                     "3" to JsonPrimitive("test3")
-                )))
+                )
             )
             val authorResponseMock = mockk<AuthorResponse>{
                 every { makeAuthorListFetched(any()) } returns res
@@ -55,7 +49,6 @@ class AuthorControllerTest: FunSpec({
             every {Module.koinModules()} returns module {
                 single<AuthorControllerLogic>{authorControllerLogicMock}
                 single<AuthorResponse>{authorResponseMock}
-                singleOf(::CommonResponse)
             }
 
             //実行(起動)
@@ -89,10 +82,7 @@ class AuthorControllerTest: FunSpec({
             val authorControllerLogicMock = mockk<AuthorControllerLogic>{
                 coEvery { fetchAllAuthors()} returns authors
             }
-            val res = ResponseEntity(
-                statusCode = HttpStatusCode.OK,
-                responseBody = ResponseBody.JsonBody(JsonObject(mapOf()))
-            )
+            val res = JsonObject(mapOf())
             val authorResponseMock = mockk<AuthorResponse>{
                 every { makeAuthorListFetched(any()) } returns res
 
@@ -102,7 +92,6 @@ class AuthorControllerTest: FunSpec({
             every {Module.koinModules()} returns module {
                 single<AuthorControllerLogic>{authorControllerLogicMock}
                 single<AuthorResponse>{authorResponseMock}
-                singleOf(::CommonResponse)
             }
 
             //実行(起動)
@@ -132,7 +121,6 @@ class AuthorControllerTest: FunSpec({
 
         test("異常系_authorControllerLogicでエラー"){
             //準備
-            val authors = listOf<Author>()
             val authorControllerLogicMock = mockk<AuthorControllerLogic>{
                 coEvery { fetchAllAuthors()} throws Exception()
             }
@@ -142,7 +130,6 @@ class AuthorControllerTest: FunSpec({
             every {Module.koinModules()} returns module {
                 single<AuthorControllerLogic>{authorControllerLogicMock}
                 single<AuthorResponse>{authorResponseMock}
-                singleOf(::CommonResponse)
             }
 
             //実行(起動)
@@ -189,7 +176,6 @@ class AuthorControllerTest: FunSpec({
             every {Module.koinModules()} returns module {
                 single<AuthorControllerLogic>{authorControllerLogicMock}
                 single<AuthorResponse>{authorResponseMock}
-                singleOf(::CommonResponse)
             }
 
             //実行(起動)

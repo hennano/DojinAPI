@@ -1,32 +1,26 @@
 package net.hennabatch.dojinapi.controller
 
+import io.ktor.http.*
 import io.ktor.resources.*
 import io.ktor.server.application.*
 import io.ktor.server.resources.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.util.logging.*
 import net.hennabatch.dojinapi.logic.AuthorControllerLogic
 import net.hennabatch.dojinapi.views.AuthorResponse
-import net.hennabatch.dojinapi.views.CommonResponse
 import org.koin.ktor.ext.inject
 
 fun Route.authorController(){
 
     val authorControllerLogic by inject<AuthorControllerLogic>()
     val authorResponse by inject<AuthorResponse>()
-    val commonResponse by inject<CommonResponse>()
 
     @Resource("/author")
     class AuthorLocation()
     get<AuthorLocation> {
-        try{
-            val authors = authorControllerLogic.fetchAllAuthors()
-            val response = authorResponse.makeAuthorListFetched(authors)
-            commonResponse.showResponse(call, response)
-        }catch (e: Exception){
-            call.application.environment.log.error(e)
-            commonResponse.showServerErrorResponse(call)
-        }
+        val authors = authorControllerLogic.fetchAllAuthors()
+        val res = authorResponse.makeAuthorListFetched(authors)
+        call.respond(HttpStatusCode.OK, res)
     }
 
     /*
