@@ -8,11 +8,11 @@ import org.jetbrains.exposed.sql.insert
 
 object AuthorRepository {
 
-    fun select(id: Int, resoleDepth: Int): Author{
+    fun select(id: Int, resoleDepth: Int = 1): Author{
         return AuthorEntity[id].toModel(resoleDepth)
     }
 
-    fun selectAll(resoleDepth: Int):List<Author>{
+    fun selectAll(resoleDepth: Int = 1):List<Author>{
         return AuthorEntity.all().with(AuthorEntity::joinedCircles).map { it.toModel(resoleDepth) }
     }
 

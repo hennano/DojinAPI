@@ -11,4 +11,8 @@ class AuthorResponse {
             .associate { it.id.toString() to JsonPrimitive(it.name!!)}
         return JsonObject(mapBody)
     }
+
+    fun makeAuthorCreated(id: Int, name:String): JsonObject{
+        return JsonObject(mapOf(id.toString() to JsonPrimitive(name)))
+    }
 }

@@ -28,7 +28,9 @@ fun Route.authorController(){
 
     post<AuthorLocation>{
         val req = call.receive<AuthorRequestEntity>()
-        authorControllerLogic.insertAuthor(name = req.name, memo = req.memo, authorAlias = req.authorAlias)
+        val id = authorControllerLogic.insertAuthor(name = req.name, memo = req.memo, authorAlias = req.authorAlias)
+        val res = authorResponse.makeAuthorCreated(id, req.name)
+        call.respond(HttpStatusCode.OK, res)
     }
     /*
 
