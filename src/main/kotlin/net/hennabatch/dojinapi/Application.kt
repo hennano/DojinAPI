@@ -22,9 +22,9 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
+    //プラグインインストール
     install(Resources)
     install(RequestValidation)
-    DatabaseSingleton.init(environment.config)
     install(ContentNegotiation) {
         json()
     }
@@ -32,6 +32,8 @@ fun Application.module() {
         modules(Module.koinModules())
     }
 
+    //初期化
+    DatabaseSingleton.init(environment.config)
     //configureSerialization()
     //configureDatabases()
     errorResponse()

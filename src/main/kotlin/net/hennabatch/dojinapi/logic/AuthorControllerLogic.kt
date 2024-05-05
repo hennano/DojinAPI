@@ -11,4 +11,8 @@ class AuthorControllerLogic {
         }
     }
 
+    fun insertAuthor(name: String, memo: String, authorAlias: List<Int>){
+
+    }
+
 }

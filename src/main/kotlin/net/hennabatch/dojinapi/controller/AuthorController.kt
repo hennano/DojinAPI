@@ -3,9 +3,12 @@ package net.hennabatch.dojinapi.controller
 import io.ktor.http.*
 import io.ktor.resources.*
 import io.ktor.server.application.*
+import io.ktor.server.request.*
 import io.ktor.server.resources.*
+import io.ktor.server.resources.post
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import net.hennabatch.dojinapi.controller.entity.AuthorRequestEntity
 import net.hennabatch.dojinapi.logic.AuthorControllerLogic
 import net.hennabatch.dojinapi.views.AuthorResponse
 import org.koin.ktor.ext.inject
@@ -23,10 +26,11 @@ fun Route.authorController(){
         call.respond(HttpStatusCode.OK, res)
     }
 
-    /*
     post<AuthorLocation>{
-
+        val req = call.receive<AuthorRequestEntity>()
+        authorControllerLogic.insertAuthor(name = req.name, memo = req.memo, authorAlias = req.authorAlias)
     }
+    /*
 
     @Resource("/author/{authorId}")
     class AuthorDetailLocation(val authorId: Int)
@@ -41,5 +45,5 @@ fun Route.authorController(){
     delete<AuthorDetailLocation> { param ->
         val authorId = param.authorId
     }
-    */
+*/
 }
