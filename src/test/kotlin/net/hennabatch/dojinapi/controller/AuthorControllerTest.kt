@@ -205,9 +205,434 @@ class AuthorControllerTest: FunSpec({
     }
 
     context("createAuthor"){
-        test("正常系"){
+        test("正常系_最小"){
             //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { insertAuthor(any(), any(), any())} returns 1
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorCreated(any(), any()) } returns JsonObject(mapOf("1" to JsonPrimitive("test1")))
+            }
 
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.post("/author"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"test1\",\"memo\": \"\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.OK
+                    bodyAsText() shouldBeEqual "{\"1\":\"test1\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 1) {
+                authorControllerLogicMock.insertAuthor("test1", "", listOf())
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 1) {
+                authorResponseMock.makeAuthorCreated(1, "test1")
+            }
+            confirmVerified(authorResponseMock)
+        }
+
+        test("正常系_すべて"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { insertAuthor(any(), any(), any())} returns 1
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorCreated(any(), any()) } returns JsonObject(mapOf("1" to JsonPrimitive("test1")))
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.post("/author"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"test1\",\"memo\": \"memomemo1\",\"author_alias\": [1, 2]}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.OK
+                    bodyAsText() shouldBeEqual "{\"1\":\"test1\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 1) {
+                authorControllerLogicMock.insertAuthor("test1", "memomemo1", listOf(1, 2))
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 1) {
+                authorResponseMock.makeAuthorCreated(1, "test1")
+            }
+            confirmVerified(authorResponseMock)
+        }
+
+        test("異常系_リクエストボディなし"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { insertAuthor(any(), any(), any())} returns 1
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorCreated(any(), any()) } returns JsonObject(mapOf("1" to JsonPrimitive("test1")))
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.post("/author"){
+                    contentType(ContentType.Application.Json)
+                    //setBody("{\"name\": \"test1\",\"memo\": \"memomemo1\",\"author_alias\": [1, 2]}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 0) {
+                authorControllerLogicMock.insertAuthor(any(), any(), any())
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 0) {
+                authorResponseMock.makeAuthorCreated(any(), any())
+            }
+            confirmVerified(authorResponseMock)
+        }
+
+        test("異常系_Content-Typeがapplication/json以外"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { insertAuthor(any(), any(), any())} returns 1
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorCreated(any(), any()) } returns JsonObject(mapOf("1" to JsonPrimitive("test1")))
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.post("/author"){
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody("{\"name\": \"test1\",\"memo\": \"memomemo1\",\"author_alias\": [1, 2]}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 0) {
+                authorControllerLogicMock.insertAuthor(any(), any(), any())
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 0) {
+                authorResponseMock.makeAuthorCreated(any(), any())
+            }
+            confirmVerified(authorResponseMock)
+        }
+
+        test("異常系_nameが項目ごとなし"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { insertAuthor(any(), any(), any())} returns 1
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorCreated(any(), any()) } returns JsonObject(mapOf("1" to JsonPrimitive("test1")))
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.post("/author"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"memo\": \"memomemo1\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 0) {
+                authorControllerLogicMock.insertAuthor(any(), any(), any())
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 0) {
+                authorResponseMock.makeAuthorCreated(any(), any())
+            }
+            confirmVerified(authorResponseMock)
+        }
+
+        test("異常系_memoが項目ごとなし"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { insertAuthor(any(), any(), any())} returns 1
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorCreated(any(), any()) } returns JsonObject(mapOf("1" to JsonPrimitive("test1")))
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.post("/author"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"test1\",\"author_alias\": [1, 2]}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 0) {
+                authorControllerLogicMock.insertAuthor(any(), any(), any())
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 0) {
+                authorResponseMock.makeAuthorCreated(any(), any())
+            }
+            confirmVerified(authorResponseMock)
+        }
+
+        test("異常系_author_aliasが項目ごとなし"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { insertAuthor(any(), any(), any())} returns 1
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorCreated(any(), any()) } returns JsonObject(mapOf("1" to JsonPrimitive("test1")))
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.post("/author"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"test1\",\"memo\": \"memomemo1\"}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 0) {
+                authorControllerLogicMock.insertAuthor(any(), any(), any())
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 0) {
+                authorResponseMock.makeAuthorCreated(any(), any())
+            }
+            confirmVerified(authorResponseMock)
+        }
+
+        test("異常系_nameが空文字"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { insertAuthor(any(), any(), any())} returns 1
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorCreated(any(), any()) } returns JsonObject(mapOf("1" to JsonPrimitive("test1")))
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.post("/author"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"\",\"memo\": \"memomemo1\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 0) {
+                authorControllerLogicMock.insertAuthor(any(), any(), any())
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 0) {
+                authorResponseMock.makeAuthorCreated(any(), any())
+            }
+            confirmVerified(authorResponseMock)
+        }
+
+        test("異常系_insertAuthorでエラー"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { insertAuthor(any(), any(), any())} throws Exception()
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorCreated(any(), any()) } returns JsonObject(mapOf("1" to JsonPrimitive("test1")))
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.post("/author"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"test1\",\"memo\": \"\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.InternalServerError
+                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 1) {
+                authorControllerLogicMock.insertAuthor(any(), any(), any())
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 0) {
+                authorResponseMock.makeAuthorCreated(any(), any())
+            }
+            confirmVerified(authorResponseMock)
+        }
+
+        test("異常系_makeAuthorCreatedでエラー"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { insertAuthor(any(), any(), any())} returns 1
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorCreated(any(), any()) } throws Exception()
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.post("/author"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"test1\",\"memo\": \"\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.InternalServerError
+                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 1) {
+                authorControllerLogicMock.insertAuthor("test1", "", listOf())
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 1) {
+                authorResponseMock.makeAuthorCreated(any(), any())
+            }
+            confirmVerified(authorResponseMock)
         }
     }
 })
