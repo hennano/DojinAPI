@@ -14,10 +14,10 @@ class AuthorAliasEntity(id: EntityID<Int>): IntEntity(id) {
     val createdAt by AuthorAliasTable.createdAt
     val updatedAt by AuthorAliasTable.updatedAt
 
-    fun toModel():AuthorAlias = AuthorAlias(
+    fun toModel(resoleDepth: Int = 1):AuthorAlias = AuthorAlias(
         id = id.value,
-        author1 = authorId1.toModel(),
-        author2 = authorId2.toModel(),
+        author1 = authorId1.toModel(resoleDepth - 1),
+        author2 = authorId2.toModel(resoleDepth - 1),
         createdAt = createdAt,
         updatedAt = updatedAt
     )
