@@ -19,7 +19,7 @@ import org.koin.dsl.module
 
 class AuthorControllerTest: FunSpec({
 
-    afterTest {
+    afterEach {
         unmockkAll()
     }
 
@@ -201,6 +201,13 @@ class AuthorControllerTest: FunSpec({
                 authorResponseMock.makeAuthorListFetched(any())
             }
             confirmVerified(authorResponseMock)
+        }
+    }
+
+    context("createAuthor"){
+        test("正常系"){
+            //準備
+
         }
     }
 })

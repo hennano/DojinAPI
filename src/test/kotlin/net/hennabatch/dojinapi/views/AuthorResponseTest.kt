@@ -9,7 +9,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import net.hennabatch.dojinapi.db.model.Author
 
 class AuthorResponseTest : FunSpec({
-    context("正常系") {
+    context("makeAuthorListFetched") {
         test("データあり") {
             //準備
             val authors = listOf(

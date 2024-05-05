@@ -23,7 +23,7 @@ class AuthorControllerLogic {
         }
     }
 
-    private fun insertAuthorAliases(authorId: Int, authorAlias: List<Int>){
+     fun insertAuthorAliases(authorId: Int, authorAlias: List<Int>){
         //AuthorAliasを登録
         val aliases = AuthorAliasRepository.selectsByAuthorId(authorId, 0)
             .map{it.author2.id}
