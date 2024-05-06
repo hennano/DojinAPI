@@ -32,20 +32,23 @@ fun Route.authorController(){
         val res = authorResponse.makeAuthorCreated(id, req.name)
         call.respond(HttpStatusCode.OK, res)
     }
-    /*
 
     @Resource("/author/{authorId}")
     class AuthorDetailLocation(val authorId: Int)
     get<AuthorDetailLocation> { param ->
         val authorId = param.authorId
+        val authorDetail = authorControllerLogic.fetchAuthor(authorId)
+        val res = authorResponse.makeAuthorFetched(authorDetail.first, authorDetail.second)
+        call.respond(HttpStatusCode.OK, res)
     }
+    /*
 
-    put<AuthorDetailLocation>{ param ->
-        val authorId = param.authorId
-    }
+put<AuthorDetailLocation>{ param ->
+    val authorId = param.authorId
+}
 
-    delete<AuthorDetailLocation> { param ->
-        val authorId = param.authorId
-    }
+delete<AuthorDetailLocation> { param ->
+    val authorId = param.authorId
+}
 */
 }

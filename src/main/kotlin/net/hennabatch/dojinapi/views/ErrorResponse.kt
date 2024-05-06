@@ -7,6 +7,7 @@ import io.ktor.server.plugins.requestvalidation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.util.logging.*
+import org.jetbrains.exposed.dao.exceptions.EntityNotFoundException
 
 
 fun Application.errorResponse(){
@@ -23,6 +24,10 @@ fun Application.errorResponse(){
                 is BadRequestException ->{
                     //json変換に失敗
                     showErrorResponse(call, HttpStatusCode.BadRequest, "BadRequest")
+                }
+                is EntityNotFoundException ->{
+                    //見つからない
+                    showErrorResponse(call, HttpStatusCode.NotFound, "NotFound")
                 }
                 else ->{
                     //サーバーエラー

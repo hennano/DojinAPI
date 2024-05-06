@@ -1332,14 +1332,16 @@ components:
       properties:
         name: {type: string}
         memo: {type: string}
+        author_alias: 
+          $ref: '#/components/schemas/AuthorBaseMulti'
+        joined_circles:
+          $ref: '#/components/schemas/CircleBaseMulti'
         created_at: 
           type: string
           format: date-time
         updated_at: 
           type: string
           format: date-time
-        author_alias: 
-          $ref: '#/components/schemas/AuthorBaseMulti'
     CircleBase:
       type: object
       additionalProperties:

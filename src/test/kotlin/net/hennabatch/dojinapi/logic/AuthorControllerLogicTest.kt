@@ -20,6 +20,10 @@ class AuthorControllerLogicTest : FunSpec({
         //とくになし
     }
 
+    context("fetchAuthorDetail"){
+        //とくになし
+    }
+
     context("insertAuthorAliases"){
         test("データ1つ"){
             //準備

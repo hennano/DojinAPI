@@ -2,6 +2,7 @@ package net.hennabatch.dojinapi.logic
 
 import net.hennabatch.dojinapi.db.DatabaseSingleton.dbQuery
 import net.hennabatch.dojinapi.db.model.Author
+import net.hennabatch.dojinapi.db.model.AuthorAlias
 import net.hennabatch.dojinapi.db.repository.AuthorAliasRepository
 import net.hennabatch.dojinapi.db.repository.AuthorRepository
 
@@ -20,6 +21,14 @@ class AuthorControllerLogic {
             //AuthorAliasを登録
             insertAuthorAliases(id, authorAlias)
             return@dbQuery id
+        }
+    }
+
+    suspend fun fetchAuthor(authorId: Int):Pair<Author, List<AuthorAlias>>{
+        return dbQuery{
+            val author = AuthorRepository.select(authorId)
+            val authorAlias = AuthorAliasRepository.selectsByAuthorId(authorId)
+            return@dbQuery author to authorAlias
         }
     }
 
