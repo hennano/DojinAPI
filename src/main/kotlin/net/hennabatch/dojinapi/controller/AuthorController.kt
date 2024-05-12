@@ -6,6 +6,7 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.resources.*
 import io.ktor.server.resources.post
+import io.ktor.server.resources.put
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import net.hennabatch.dojinapi.controller.entity.AuthorRequestEntity
@@ -41,11 +42,15 @@ fun Route.authorController(){
         val res = authorResponse.makeAuthorFetched(authorDetail.first, authorDetail.second)
         call.respond(HttpStatusCode.OK, res)
     }
-    /*
 
-put<AuthorDetailLocation>{ param ->
-    val authorId = param.authorId
-}
+    put<AuthorDetailLocation>{ param ->
+        val req = call.receive<AuthorRequestEntity>()
+        val authorId = param.authorId
+        val id = authorControllerLogic.updateAuthor(id = authorId, name = req.name, memo = req.memo, authorAlias = req.authorAlias)
+        val res = authorResponse.makeAuthorUpdated(id, req.name)
+        call.respond(HttpStatusCode.OK, res)
+    }
+    /*
 
 delete<AuthorDetailLocation> { param ->
     val authorId = param.authorId

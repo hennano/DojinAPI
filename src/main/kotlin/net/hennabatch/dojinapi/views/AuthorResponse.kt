@@ -34,4 +34,8 @@ class AuthorResponse {
             "updated_at" to JsonPrimitive(author.updatedAt?.toJavaLocalDateTime()?.format(DateTimeFormatter.ISO_DATE_TIME)),
         ))
     }
+
+    fun makeAuthorUpdated(id: Int, name:String): JsonObject{
+        return JsonObject(mapOf(id.toString() to JsonPrimitive(name)))
+    }
 }

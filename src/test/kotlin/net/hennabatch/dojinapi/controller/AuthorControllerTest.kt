@@ -520,6 +520,49 @@ class AuthorControllerTest: FunSpec({
             confirmVerified(authorResponseMock)
         }
 
+        test("異常系_author_aliasに存在しないAuthorIdが指定されている"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { insertAuthor(any(), any(), any())} throws  EntityNotFoundException(EntityID(1, AuthorTable), AuthorEntity)
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorCreated(any(), any()) } returns JsonObject(mapOf("1" to JsonPrimitive("test1")))
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.post("/author"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"test1\",\"memo\": \"\",\"author_alias\": [1]}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.NotFound
+                    bodyAsText() shouldBeEqual "{\"error\":\"NotFound\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 1) {
+                authorControllerLogicMock.insertAuthor(any(), any(), any())
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 0) {
+                authorResponseMock.makeAuthorCreated(any(), any())
+            }
+            confirmVerified(authorResponseMock)
+        }
+
         test("異常系_nameが空文字"){
             //準備
             val authorControllerLogicMock = mockk<AuthorControllerLogic>{
@@ -649,6 +692,7 @@ class AuthorControllerTest: FunSpec({
             confirmVerified(authorResponseMock)
         }
     }
+
     context("getAuthor"){
         test("正常系_最小"){
             //準備
@@ -709,6 +753,7 @@ class AuthorControllerTest: FunSpec({
         test("異常系_author_idが項目ごと存在しない"){
             logger.info("getAuthorList::正常系で実施")
         }
+
         test("異常系_author_idが数値でない"){
             //準備
             val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
@@ -873,6 +918,367 @@ class AuthorControllerTest: FunSpec({
             confirmVerified(authorControllerLogicMock)
             verify(exactly = 1) {
                 authorResponseMock.makeAuthorFetched(author, listOf())
+            }
+            confirmVerified(authorResponseMock)
+        }
+    }
+
+    context("updateAuthor"){
+        test("正常系_最小"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { updateAuthor(any(),any(),any(),any())} returns 1
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorUpdated(any(), any()) } returns JsonObject(mapOf("1" to JsonPrimitive("test1")))
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.put("/author/1"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"test1\",\"memo\": \"\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.OK
+                    bodyAsText() shouldBeEqual "{\"1\":\"test1\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 1) {
+                authorControllerLogicMock.updateAuthor(1, "test1", "", listOf())
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 1) {
+                authorResponseMock.makeAuthorUpdated(1, "test1")
+            }
+            confirmVerified(authorResponseMock)
+        }
+
+        test("正常系_すべて"){
+            logger.info("updateAuthor::正常系_最小と、makeAuthorUpdated::データあり_すべてで実施")
+        }
+
+        test("異常系_author_idが項目ごと存在しない"){
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.put("/author/"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"test1\",\"memo\": \"\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.NotFound
+                    bodyAsText() shouldBeEqual "{\"error\":\"NotFound\"}"
+                }
+            }
+        }
+
+        test("異常系_author_idが数値でない"){
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.put("/author/a"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"test1\",\"memo\": \"\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+        }
+
+        test("異常系_author_idが存在しない値"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { fetchAuthor(any())} throws EntityNotFoundException(EntityID(1, AuthorTable), AuthorEntity)
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorFetched(any(), any()) } returns JsonObject(mapOf())
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.put("/author/a"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"test1\",\"memo\": \"\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+        }
+
+        test("異常系_リクエストボディなし"){
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.put("/author/1"){
+                    contentType(ContentType.Application.Json)
+                    //setBody("{\"name\": \"test1\",\"memo\": \"\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+        }
+
+        test("異常系_Content-Typeがapplication/json以外"){
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.put("/author/1"){
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody("{\"name\": \"test1\",\"memo\": \"\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+        }
+
+        test("異常系_nameが項目ごとなし"){
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.put("/author/1"){
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody("{\"memo\": \"\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+        }
+
+        test("異常系_memoが項目ごとなし"){
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.put("/author/1"){
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody("{\"name\": \"test1\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+        }
+
+        test("異常系_author_aliasが項目ごとなし"){
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.put("/author/1"){
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody("{\"name\": \"test1\",\"memo\": \"\"}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+        }
+
+        test("異常系_updateAuthorでエラー"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { updateAuthor(any(),any(),any(),any())} throws Exception()
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorUpdated(any(), any()) } returns JsonObject(mapOf("1" to JsonPrimitive("test1")))
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.put("/author/1"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"test1\",\"memo\": \"\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.InternalServerError
+                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 1) {
+                authorControllerLogicMock.updateAuthor(1, "test1", "", listOf())
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 0) {
+                authorResponseMock.makeAuthorUpdated(any(), any())
+            }
+            confirmVerified(authorResponseMock)
+        }
+
+        test("異常系_author_aliasに存在しないAuthorIdが指定されている"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { updateAuthor(any(),any(),any(),any())} throws EntityNotFoundException(EntityID(1, AuthorTable), AuthorEntity)
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorUpdated(any(), any()) } returns JsonObject(mapOf("1" to JsonPrimitive("test1")))
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.put("/author/1"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"test1\",\"memo\": \"\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.NotFound
+                    bodyAsText() shouldBeEqual "{\"error\":\"NotFound\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 1) {
+                authorControllerLogicMock.updateAuthor(1, "test1", "", listOf())
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 0) {
+                authorResponseMock.makeAuthorUpdated(any(), any())
+            }
+            confirmVerified(authorResponseMock)
+        }
+
+        test("異常系_nameが空文字"){
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.put("/author/1"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"\",\"memo\": \"\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+        }
+
+        test("異常系_makeAuthorUpdatedでエラー"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { updateAuthor(any(),any(),any(),any())} returns 1
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorUpdated(any(), any()) } throws Exception()
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.put("/author/1"){
+                    contentType(ContentType.Application.Json)
+                    setBody("{\"name\": \"test1\",\"memo\": \"\",\"author_alias\": []}")
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.InternalServerError
+                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 1) {
+                authorControllerLogicMock.updateAuthor(1, "test1", "", listOf())
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 1) {
+                authorResponseMock.makeAuthorUpdated(1, "test1")
             }
             confirmVerified(authorResponseMock)
         }

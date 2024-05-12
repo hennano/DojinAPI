@@ -5,6 +5,8 @@ import net.hennabatch.dojinapi.db.model.AuthorAlias
 import net.hennabatch.dojinapi.db.table.AuthorAliasTable
 import net.hennabatch.dojinapi.db.table.AuthorAliasTable.authorId1
 import net.hennabatch.dojinapi.db.table.AuthorAliasTable.authorId2
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.or
 
@@ -40,5 +42,11 @@ object AuthorAliasRepository {
                 it
             }
         }
+    }
+
+    fun delete(id: Int): Boolean{
+        return AuthorAliasTable.deleteWhere {
+            AuthorAliasTable.id eq id
+        } > 0
     }
 }

@@ -10,8 +10,8 @@ import io.ktor.server.resources.*
 import net.hennabatch.dojinapi.controller.validation.authorRequestValidation
 import net.hennabatch.dojinapi.db.DatabaseSingleton
 import net.hennabatch.dojinapi.plugins.configureRouting
+import net.hennabatch.dojinapi.plugins.errorResponse
 import net.hennabatch.dojinapi.security.configureAuthCognitoSecurity
-import net.hennabatch.dojinapi.views.errorResponse
 import org.koin.ktor.plugin.Koin
 
 fun main(args: Array<String>) {

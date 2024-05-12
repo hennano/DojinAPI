@@ -1,4 +1,4 @@
-package net.hennabatch.dojinapi.views
+package net.hennabatch.dojinapi.plugins
 
 import io.ktor.http.*
 import io.ktor.server.application.*

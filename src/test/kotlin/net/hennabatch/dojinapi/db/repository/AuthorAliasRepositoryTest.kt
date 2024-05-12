@@ -2,6 +2,8 @@ package net.hennabatch.dojinapi.db.repository
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
@@ -16,6 +18,7 @@ import net.hennabatch.dojinapi.db.model.AuthorAlias
 import org.jetbrains.exposed.dao.exceptions.EntityNotFoundException
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.postgresql.util.PSQLException
 import java.time.format.DateTimeFormatter
 
 class AuthorAliasRepositoryTest: FunSpec({
@@ -185,6 +188,49 @@ class AuthorAliasRepositoryTest: FunSpec({
             res.author2 shouldBeEqual expectedAuthor
             res.createdAt?.shouldBeAfter(now.toLocalDateTime(TimeZone.currentSystemDefault()))
             res.updatedAt?.shouldBeAfter(now.toLocalDateTime(TimeZone.currentSystemDefault()))
+        }
+
+        test("登録_該当のAuthorなし"){
+            //実行
+            shouldThrow<PSQLException> {
+                DatabaseSingleton.dbQuery {
+                    AuthorAliasRepository.insert(1,1)
+                }
+            }
+        }
+    }
+
+    context("delete"){
+        test("削除対象あり"){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'test1', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 1, '$strLocalDateTime', '$strLocalDateTime')")
+            }
+            //実行
+            val result = DatabaseSingleton.dbQuery {
+                AuthorAliasRepository.delete(1)
+            }
+
+            //検証
+            result.shouldBeTrue()
+
+            shouldThrow<EntityNotFoundException> {
+                DatabaseSingleton.dbQuery {
+                    AuthorAliasRepository.select(1, 0)
+                }
+            }
+        }
+        test("削除対象なし"){
+            //実行
+            val result = DatabaseSingleton.dbQuery {
+                AuthorAliasRepository.delete(1)
+            }
+
+            //検証
+            result.shouldBeFalse()
         }
     }
 })
