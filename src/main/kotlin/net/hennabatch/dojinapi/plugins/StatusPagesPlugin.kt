@@ -15,6 +15,9 @@ fun Application.errorResponse(){
         status(HttpStatusCode.UnsupportedMediaType){ call, status ->
             showErrorResponse(call, HttpStatusCode.BadRequest, "BadRequest")
         }
+        status(HttpStatusCode.NotFound){ call, status ->
+            showErrorResponse(call, HttpStatusCode.NotFound, "NotFound")
+        }
         exception<Throwable> {call, cause ->
             when(cause){
                 is RequestValidationException ->{

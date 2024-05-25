@@ -17,10 +17,6 @@ class AuthorControllerLogicTest : FunSpec({
     }
 
     context("insertAuthor"){
-        test("データあり_エイリアスなし"){
-
-        }
-        test("データあり_エイリアスあり")
     }
 
     context("fetchAuthorDetail"){
@@ -160,5 +156,9 @@ class AuthorControllerLogicTest : FunSpec({
             }
             confirmVerified(AuthorAliasRepository)
         }
+    }
+
+    context("deleteAuthor"){
+
     }
 })

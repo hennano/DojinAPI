@@ -38,4 +38,8 @@ class AuthorResponse {
     fun makeAuthorUpdated(id: Int, name:String): JsonObject{
         return JsonObject(mapOf(id.toString() to JsonPrimitive(name)))
     }
+
+    fun makeAuthorDeleted(isSucceededInDeletion: Boolean): JsonObject{
+        return JsonObject(mapOf())
+    }
 }

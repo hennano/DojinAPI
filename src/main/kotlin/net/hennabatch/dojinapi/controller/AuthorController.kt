@@ -50,10 +50,11 @@ fun Route.authorController(){
         val res = authorResponse.makeAuthorUpdated(id, req.name)
         call.respond(HttpStatusCode.OK, res)
     }
-    /*
 
-delete<AuthorDetailLocation> { param ->
-    val authorId = param.authorId
-}
-*/
+    delete<AuthorDetailLocation> { param ->
+        val authorId = param.authorId
+        val isSucceededInDeletion = authorControllerLogic.deleteAuthor(authorId)
+        val res = authorResponse.makeAuthorDeleted(isSucceededInDeletion)
+        call.respond(HttpStatusCode.OK, res)
+    }
 }

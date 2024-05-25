@@ -1011,10 +1011,10 @@ class AuthorControllerTest: FunSpec({
         test("異常系_author_idが存在しない値"){
             //準備
             val authorControllerLogicMock = mockk<AuthorControllerLogic>{
-                coEvery { fetchAuthor(any())} throws EntityNotFoundException(EntityID(1, AuthorTable), AuthorEntity)
+                coEvery { updateAuthor(any(),any(),any(),any())} throws EntityNotFoundException(EntityID(1, AuthorTable), AuthorEntity)
             }
             val authorResponseMock = mockk<AuthorResponse>{
-                every { makeAuthorFetched(any(), any()) } returns JsonObject(mapOf())
+                every { makeAuthorUpdated(any(), any()) } returns JsonObject(mapOf())
             }
 
             //モジュールの差し替え
@@ -1029,14 +1029,14 @@ class AuthorControllerTest: FunSpec({
                     config = ApplicationConfig("application_local.yaml")
                 }
                 // 実行(リクエスト)
-                client.put("/author/a"){
+                client.put("/author/1"){
                     contentType(ContentType.Application.Json)
                     setBody("{\"name\": \"test1\",\"memo\": \"\",\"author_alias\": []}")
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
-                    status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    status shouldBeEqual HttpStatusCode.NotFound
+                    bodyAsText() shouldBeEqual "{\"error\":\"NotFound\"}"
                 }
             }
         }
@@ -1279,6 +1279,190 @@ class AuthorControllerTest: FunSpec({
             confirmVerified(authorControllerLogicMock)
             verify(exactly = 1) {
                 authorResponseMock.makeAuthorUpdated(1, "test1")
+            }
+            confirmVerified(authorResponseMock)
+        }
+    }
+
+    context("deleteAuthor"){
+        test("正常系"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { deleteAuthor(any())} returns true
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorDeleted(any()) } returns JsonObject(mapOf())
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.delete("/author/1"){
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.OK
+                    bodyAsText() shouldBeEqual "{}"
+                }
+            }
+            //検証
+            coVerify(exactly = 1) {
+                authorControllerLogicMock.deleteAuthor(1)
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 1) {
+                authorResponseMock.makeAuthorDeleted(true)
+            }
+            confirmVerified(authorResponseMock)
+        }
+
+        test("異常系_author_idが項目ごと存在しない"){
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.delete("/author/"){
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.NotFound
+                    bodyAsText() shouldBeEqual "{\"error\":\"NotFound\"}"
+                }
+            }
+        }
+
+        test("異常系_author_idが数値でない"){
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.delete("/author/a"){
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.BadRequest
+                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                }
+            }
+        }
+
+        test("異常系_author_idが存在しない値"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { deleteAuthor(any())} throws EntityNotFoundException(EntityID(1, AuthorTable), AuthorEntity)
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.delete("/author/1"){
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.NotFound
+                    bodyAsText() shouldBeEqual "{\"error\":\"NotFound\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 1) {
+                authorControllerLogicMock.deleteAuthor(1)
+            }
+            confirmVerified(authorControllerLogicMock)
+        }
+
+        test("異常系_deleteAuthorでエラー"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { deleteAuthor(any())} throws Exception()
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.delete("/author/1"){
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.InternalServerError
+                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 1) {
+                authorControllerLogicMock.deleteAuthor(1)
+            }
+            confirmVerified(authorControllerLogicMock)
+        }
+
+        test("異常系_makeAuthorDeletedでエラー"){
+            //準備
+            val authorControllerLogicMock = mockk<AuthorControllerLogic>{
+                coEvery { deleteAuthor(any())} returns true
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorDeleted(any()) } throws Exception()
+            }
+
+            //モジュールの差し替え
+            mockkObject(objects = arrayOf(Module), recordPrivateCalls = true)
+            every {Module.koinModules()} returns module {
+                single<AuthorControllerLogic>{authorControllerLogicMock}
+                single<AuthorResponse>{authorResponseMock}
+            }
+
+            //実行(起動)
+            testApplication {
+                environment {
+                    config = ApplicationConfig("application_local.yaml")
+                }
+                // 実行(リクエスト)
+                client.delete("/author/1"){
+                }.apply {
+                    //検証(リクエスト)
+                    logger.info(bodyAsText())
+                    status shouldBeEqual HttpStatusCode.InternalServerError
+                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                }
+            }
+            //検証
+            coVerify(exactly = 1) {
+                authorControllerLogicMock.deleteAuthor(1)
+            }
+            confirmVerified(authorControllerLogicMock)
+            verify(exactly = 1) {
+                authorResponseMock.makeAuthorDeleted(true)
             }
             confirmVerified(authorResponseMock)
         }

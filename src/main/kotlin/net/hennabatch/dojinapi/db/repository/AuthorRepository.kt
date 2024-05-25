@@ -4,6 +4,8 @@ import net.hennabatch.dojinapi.db.entity.AuthorEntity
 import net.hennabatch.dojinapi.db.model.Author
 import net.hennabatch.dojinapi.db.table.AuthorTable
 import org.jetbrains.exposed.dao.with
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.update
 
@@ -33,5 +35,11 @@ object AuthorRepository {
             it[this.memo] = memo
         }
         return id
+    }
+
+    fun delete(id: Int): Boolean{
+        return AuthorTable.deleteWhere {
+            AuthorTable.id eq id
+        } > 0
     }
 }

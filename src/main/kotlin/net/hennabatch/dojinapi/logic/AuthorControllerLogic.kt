@@ -54,12 +54,15 @@ class AuthorControllerLogic {
 
     suspend fun updateAuthor(id: Int, name: String, memo: String, authorAlias: List<Int>): Int{
         return dbQuery{
+            //Authorが存在するか確認
+            //もし存在しなければEntityNotFoundExceptionが投げられる
+            AuthorRepository.select(id)
             //authorAliasにあるIDが存在するIDか確認する
             authorAlias.forEach{
                 //もし存在しなければEntityNotFoundExceptionが投げられる
                 AuthorRepository.select(it)
             }
-            //Authorをインサート
+            //Authorをupdate
             AuthorRepository.update(id, name, memo)
 
             //AuthorAliasを登録
@@ -67,6 +70,19 @@ class AuthorControllerLogic {
             return@dbQuery id
         }
 
+    }
+
+    suspend fun deleteAuthor(id: Int): Boolean{
+        return dbQuery {
+            //Authorが存在するか確認
+            //もし存在しなければEntityNotFoundExceptionが投げられる
+            AuthorRepository.select(id)
+
+            //AuthorAliasを削除
+            AuthorAliasRepository.deletesIncludedByAuthorId(id)
+            //Authorを削除
+            return@dbQuery AuthorRepository.delete(id)
+        }
     }
 
 }

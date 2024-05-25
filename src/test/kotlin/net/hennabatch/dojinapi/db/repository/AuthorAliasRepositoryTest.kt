@@ -1,5 +1,6 @@
 package net.hennabatch.dojinapi.db.repository
 
+import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -10,6 +11,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.kotlinx.datetime.shouldBeAfter
+import io.kotest.matchers.shouldBe
 import kotlinx.datetime.*
 import net.hennabatch.dojinapi.common.utils.logger
 import net.hennabatch.dojinapi.db.DatabaseSingleton
@@ -231,6 +233,160 @@ class AuthorAliasRepositoryTest: FunSpec({
 
             //検証
             result.shouldBeFalse()
+        }
+    }
+
+    context("deletesIncludedByAuthorId"){
+        test("削除対象あり_author_id1"){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'test1', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (2, 'test2', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (3, 'test3', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 2, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (2, 1, 3, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (3, 2, 3, '$strLocalDateTime', '$strLocalDateTime')")
+            }
+
+            //実行
+            val result = DatabaseSingleton.dbQuery {
+                AuthorAliasRepository.deletesIncludedByAuthorId(1)
+            }
+
+            //検証
+            result shouldBe 2
+
+            shouldThrow<EntityNotFoundException> {
+                DatabaseSingleton.dbQuery {
+                    AuthorAliasRepository.select(1, 0)
+                }
+            }
+            shouldThrow<EntityNotFoundException> {
+                DatabaseSingleton.dbQuery {
+                    AuthorAliasRepository.select(2, 0)
+                }
+            }
+            shouldNotThrow<EntityNotFoundException> {
+                DatabaseSingleton.dbQuery {
+                    AuthorAliasRepository.select(3, 0)
+                }
+            }
+        }
+
+        test("削除対象あり_author_id2"){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'test1', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (2, 'test2', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (3, 'test3', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 2, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (2, 1, 3, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (3, 2, 3, '$strLocalDateTime', '$strLocalDateTime')")
+            }
+
+            //実行
+            val result = DatabaseSingleton.dbQuery {
+                AuthorAliasRepository.deletesIncludedByAuthorId(3)
+            }
+
+            //検証
+            result shouldBe 2
+
+            shouldNotThrow<EntityNotFoundException> {
+                DatabaseSingleton.dbQuery {
+                    AuthorAliasRepository.select(1, 0)
+                }
+            }
+            shouldThrow<EntityNotFoundException> {
+                DatabaseSingleton.dbQuery {
+                    AuthorAliasRepository.select(2, 0)
+                }
+            }
+            shouldThrow<EntityNotFoundException> {
+                DatabaseSingleton.dbQuery {
+                    AuthorAliasRepository.select(3, 0)
+                }
+            }
+        }
+
+        test("削除対象あり_両方"){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'test1', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (2, 'test2', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (3, 'test3', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 2, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (2, 1, 3, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (3, 2, 3, '$strLocalDateTime', '$strLocalDateTime')")
+            }
+
+            //実行
+            val result = DatabaseSingleton.dbQuery {
+                AuthorAliasRepository.deletesIncludedByAuthorId(2)
+            }
+
+            //検証
+            result shouldBe 2
+
+            shouldThrow<EntityNotFoundException> {
+                DatabaseSingleton.dbQuery {
+                    AuthorAliasRepository.select(1, 0)
+                }
+            }
+            shouldNotThrow<EntityNotFoundException> {
+                DatabaseSingleton.dbQuery {
+                    AuthorAliasRepository.select(2, 0)
+                }
+            }
+            shouldThrow<EntityNotFoundException> {
+                DatabaseSingleton.dbQuery {
+                    AuthorAliasRepository.select(3, 0)
+                }
+            }
+        }
+
+        test("削除対象なし"){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'test1', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (2, 'test2', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (3, 'test3', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 2, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (2, 1, 3, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (3, 2, 3, '$strLocalDateTime', '$strLocalDateTime')")
+            }
+
+            //実行
+            val result = DatabaseSingleton.dbQuery {
+                AuthorAliasRepository.deletesIncludedByAuthorId(4)
+            }
+
+            //検証
+            result shouldBe 0
+
+            shouldNotThrow<EntityNotFoundException> {
+                DatabaseSingleton.dbQuery {
+                    AuthorAliasRepository.select(1, 0)
+                }
+            }
+            shouldNotThrow<EntityNotFoundException> {
+                DatabaseSingleton.dbQuery {
+                    AuthorAliasRepository.select(2, 0)
+                }
+            }
+            shouldNotThrow<EntityNotFoundException> {
+                DatabaseSingleton.dbQuery {
+                    AuthorAliasRepository.select(3, 0)
+                }
+            }
         }
     }
 })

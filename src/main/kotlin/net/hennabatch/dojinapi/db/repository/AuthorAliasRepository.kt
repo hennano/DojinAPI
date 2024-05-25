@@ -49,4 +49,11 @@ object AuthorAliasRepository {
             AuthorAliasTable.id eq id
         } > 0
     }
+
+    fun deletesIncludedByAuthorId(authorId: Int):Int{
+        return AuthorAliasTable.deleteWhere {
+            (authorId1 eq authorId) or
+                    (authorId2 eq authorId)
+        }
+    }
 }

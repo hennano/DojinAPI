@@ -1,7 +1,10 @@
 package net.hennabatch.dojinapi.db.repository
 
+import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
@@ -30,6 +33,7 @@ class AuthorRepositoryTest: FunSpec({
     beforeEach{
         transaction {
             TransactionManager.current().exec("DELETE FROM djla.m_author_circle")
+            TransactionManager.current().exec("DELETE FROM djla.author_alias")
             TransactionManager.current().exec("DELETE FROM djla.author")
             TransactionManager.current().exec("DELETE FROM djla.circle")
         }
@@ -170,6 +174,52 @@ class AuthorRepositoryTest: FunSpec({
             res.joinedCircles.shouldBeEmpty()
             res.createdAt?.shouldBeAfter(now.toLocalDateTime(TimeZone.currentSystemDefault()))
             res.updatedAt?.shouldBeAfter(now.toLocalDateTime(TimeZone.currentSystemDefault()))
+        }
+    }
+
+    context("delete"){
+        test("削除対象あり"){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'test1', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+            }
+
+            //実行
+            val result = dbQuery {
+                AuthorRepository.delete(1)
+            }
+
+            result.shouldBeTrue()
+
+            shouldThrow<EntityNotFoundException> {
+                dbQuery {
+                    AuthorRepository.select(1, 0)
+                }
+            }
+        }
+
+        test("削除対象なし"){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'test1', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+            }
+
+            //実行
+            val result = dbQuery {
+                AuthorRepository.delete(2)
+            }
+
+            result.shouldBeFalse()
+
+            shouldNotThrow<EntityNotFoundException> {
+                dbQuery {
+                    AuthorRepository.select(1, 0)
+                }
+            }
         }
     }
 })
