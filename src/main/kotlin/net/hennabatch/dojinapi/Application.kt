@@ -37,8 +37,6 @@ fun Application.module() {
 
     //初期化
     DatabaseSingleton.init(environment.config)
-    //configureSerialization()
-    //configureDatabases()
     errorResponse()
     configureAuthCognitoSecurity()
     configureRouting()
