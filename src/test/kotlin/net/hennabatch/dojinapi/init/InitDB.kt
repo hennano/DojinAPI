@@ -1,4 +1,4 @@
-package net.hennabatch.dojinapi.test
+package net.hennabatch.dojinapi.init
 
 import net.hennabatch.dojinapi.db.table.*
 import org.jetbrains.exposed.sql.SchemaUtils

@@ -16,7 +16,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.mockk.*
 import net.hennabatch.dojinapi.common.utils.logger
-import net.hennabatch.dojinapi.test.InitCognito
+import net.hennabatch.dojinapi.init.InitCognito
 import kotlin.test.assertEquals
 
 class AuthCognitoJwtTest: FunSpec({

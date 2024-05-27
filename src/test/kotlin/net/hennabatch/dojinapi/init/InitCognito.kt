@@ -1,4 +1,4 @@
-package net.hennabatch.dojinapi.test
+package net.hennabatch.dojinapi.init
 
 import aws.sdk.kotlin.services.cognitoidentityprovider.CognitoIdentityProviderClient
 import aws.sdk.kotlin.services.cognitoidentityprovider.model.*
