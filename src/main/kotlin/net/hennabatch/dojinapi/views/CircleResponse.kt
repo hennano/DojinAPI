@@ -8,7 +8,7 @@ class CircleResponse {
     fun makeCircleListFetched(circles: List<Circle>): JsonObject {
         val mapBody = circles
             .filter { it.name != null }
-            .associate { it.toString() to JsonPrimitive(it.name!!) }
+            .associate { it.id.toString() to JsonPrimitive(it.name!!) }
         return JsonObject(mapBody)
     }
 }
