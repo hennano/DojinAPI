@@ -29,7 +29,7 @@ fun Route.authorController(){
 
     post<AuthorLocation>{
         val req = call.receive<AuthorRequestEntity>()
-        val id = authorControllerLogic.insertAuthor(name = req.name, memo = req.memo, authorAlias = req.authorAlias)
+        val id = authorControllerLogic.insertAuthor(name = req.name!!, memo = req.memo!!, authorAlias = req.authorAlias!!)
         val res = authorResponse.makeAuthorCreated(id, req.name)
         call.respond(HttpStatusCode.OK, res)
     }
@@ -46,7 +46,7 @@ fun Route.authorController(){
     put<AuthorDetailLocation>{ param ->
         val req = call.receive<AuthorRequestEntity>()
         val authorId = param.authorId
-        val id = authorControllerLogic.updateAuthor(id = authorId, name = req.name, memo = req.memo, authorAlias = req.authorAlias)
+        val id = authorControllerLogic.updateAuthor(id = authorId, name = req.name!!, memo = req.memo!!, authorAlias = req.authorAlias!!)
         val res = authorResponse.makeAuthorUpdated(id, req.name)
         call.respond(HttpStatusCode.OK, res)
     }

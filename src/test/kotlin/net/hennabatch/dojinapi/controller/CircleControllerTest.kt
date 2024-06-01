@@ -5,6 +5,7 @@ import io.kotest.matchers.equals.shouldBeEqual
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.server.application.*
 import io.ktor.server.config.*
 import io.ktor.server.testing.*
 import io.mockk.*
@@ -16,6 +17,7 @@ import net.hennabatch.dojinapi.logic.CircleControllerLogic
 import net.hennabatch.dojinapi.views.CircleResponse
 import net.hennabatch.dojinapi.Module
 import net.hennabatch.dojinapi.common.utils.logger
+import net.hennabatch.dojinapi.configRouting
 import org.koin.dsl.module
 
 class CircleControllerTest: FunSpec({
@@ -24,6 +26,9 @@ class CircleControllerTest: FunSpec({
         //DBは使わないのでモックして無効化する
         mockkObject(objects = arrayOf(DatabaseSingleton), recordPrivateCalls = true)
         every { DatabaseSingleton.init(any()) } just Runs
+        //デフォルトのルートを無効化する
+        mockkStatic(Application::configRouting.declaringKotlinFile)
+        every { (Application::configRouting)(any()) } just Runs
     }
 
     afterEach {
@@ -60,6 +65,10 @@ class CircleControllerTest: FunSpec({
             testApplication {
                 environment {
                     config = ApplicationConfig("application_local.yaml")
+                }
+                //検証対象のRouteをロード
+                routing {
+                    circleController()
                 }
                 // 実行(リクエスト)
                 client.get("/circle"){
@@ -103,6 +112,10 @@ class CircleControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    circleController()
+                }
                 // 実行(リクエスト)
                 client.get("/circle"){
                 }.apply {
@@ -141,13 +154,17 @@ class CircleControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    circleController()
+                }
                 // 実行(リクエスト)
                 client.get("/circle"){
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.InternalServerError
-                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Internal Server Error\"}"
                 }
                 //検証
                 coVerify(exactly = 1){
@@ -186,13 +203,17 @@ class CircleControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    circleController()
+                }
                 // 実行(リクエスト)
                 client.get("/circle"){
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.InternalServerError
-                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Internal Server Error\"}"
                 }
                 //検証
                 coVerify(exactly = 1){

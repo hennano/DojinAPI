@@ -1,14 +1,16 @@
-package net.hennabatch.dojinapi.plugins
+package net.hennabatch.dojinapi
 
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 import net.hennabatch.dojinapi.controller.authorController
 import net.hennabatch.dojinapi.controller.circleController
 
-fun Application.configureRouting() {
-
+fun Application.configRouting() {
     routing {
-        authorController()
-        circleController()
+        authenticate("jwt") {
+            authorController()
+            circleController()
+        }
     }
 }

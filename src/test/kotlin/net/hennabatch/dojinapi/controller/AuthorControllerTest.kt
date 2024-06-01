@@ -5,6 +5,7 @@ import io.kotest.matchers.equals.shouldBeEqual
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.server.application.*
 import io.ktor.server.config.*
 import io.ktor.server.testing.*
 import io.mockk.*
@@ -24,13 +25,17 @@ import org.jetbrains.exposed.dao.exceptions.EntityNotFoundException
 import org.jetbrains.exposed.dao.id.EntityID
 import org.koin.dsl.module
 import java.time.format.DateTimeFormatter
+import net.hennabatch.dojinapi.configRouting
 
 class AuthorControllerTest: FunSpec({
 
-    beforeEach{
+    beforeEach {
         //DBは使わないのでモックして無効化する
         mockkObject(objects = arrayOf(DatabaseSingleton), recordPrivateCalls = true)
-        every { DatabaseSingleton.init(any())} just Runs
+        every { DatabaseSingleton.init(any()) } just Runs
+        //デフォルトのルートを無効化する
+        mockkStatic(Application::configRouting.declaringKotlinFile)
+        every { (Application::configRouting)(any()) } just Runs
     }
 
     afterEach {
@@ -70,6 +75,11 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
+
                 // 実行(リクエスト)
                 client.get("/author"){
                 }.apply {
@@ -113,6 +123,11 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
+
                 // 実行(リクエスト)
                 client.get("/author"){
                 }.apply {
@@ -151,13 +166,18 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
+
                 // 実行(リクエスト)
                 client.get("/author"){
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.InternalServerError
-                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Internal Server Error\"}"
                 }
             }
             //検証
@@ -197,13 +217,18 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
+
                 // 実行(リクエスト)
                 client.get("/author"){
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.InternalServerError
-                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Internal Server Error\"}"
                 }
             }
             //検証
@@ -240,6 +265,11 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
+
                 // 実行(リクエスト)
                 client.post("/author"){
                     contentType(ContentType.Application.Json)
@@ -282,6 +312,10 @@ class AuthorControllerTest: FunSpec({
             testApplication {
                 environment {
                     config = ApplicationConfig("application_local.yaml")
+                }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
                 }
                 // 実行(リクエスト)
                 client.post("/author"){
@@ -326,6 +360,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.post("/author"){
                     contentType(ContentType.Application.Json)
@@ -333,8 +371,8 @@ class AuthorControllerTest: FunSpec({
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
-                    status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    status shouldBeEqual HttpStatusCode.UnsupportedMediaType
+                    bodyAsText() shouldBeEqual "{\"error\":\"Unsupported Media Type\"}"
                 }
             }
             //検証
@@ -369,6 +407,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.post("/author"){
                     contentType(ContentType.Application.FormUrlEncoded)
@@ -376,8 +418,8 @@ class AuthorControllerTest: FunSpec({
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
-                    status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    status shouldBeEqual HttpStatusCode.UnsupportedMediaType
+                    bodyAsText() shouldBeEqual "{\"error\":\"Unsupported Media Type\"}"
                 }
             }
             //検証
@@ -412,6 +454,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.post("/author"){
                     contentType(ContentType.Application.Json)
@@ -420,7 +466,7 @@ class AuthorControllerTest: FunSpec({
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Bad Request\"}"
                 }
             }
             //検証
@@ -455,6 +501,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.post("/author"){
                     contentType(ContentType.Application.Json)
@@ -463,7 +513,7 @@ class AuthorControllerTest: FunSpec({
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Bad Request\"}"
                 }
             }
             //検証
@@ -498,6 +548,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.post("/author"){
                     contentType(ContentType.Application.Json)
@@ -506,7 +560,7 @@ class AuthorControllerTest: FunSpec({
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Bad Request\"}"
                 }
             }
             //検証
@@ -541,6 +595,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.post("/author"){
                     contentType(ContentType.Application.Json)
@@ -549,7 +607,7 @@ class AuthorControllerTest: FunSpec({
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.NotFound
-                    bodyAsText() shouldBeEqual "{\"error\":\"NotFound\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Not Found\"}"
                 }
             }
             //検証
@@ -584,6 +642,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.post("/author"){
                     contentType(ContentType.Application.Json)
@@ -592,7 +654,7 @@ class AuthorControllerTest: FunSpec({
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Bad Request\"}"
                 }
             }
             //検証
@@ -627,6 +689,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.post("/author"){
                     contentType(ContentType.Application.Json)
@@ -635,7 +701,7 @@ class AuthorControllerTest: FunSpec({
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.InternalServerError
-                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Internal Server Error\"}"
                 }
             }
             //検証
@@ -670,6 +736,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.post("/author"){
                     contentType(ContentType.Application.Json)
@@ -678,7 +748,7 @@ class AuthorControllerTest: FunSpec({
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.InternalServerError
-                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Internal Server Error\"}"
                 }
             }
             //検証
@@ -725,6 +795,10 @@ class AuthorControllerTest: FunSpec({
             testApplication {
                 environment {
                     config = ApplicationConfig("application_local.yaml")
+                }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
                 }
                 // 実行(リクエスト)
                 client.get("/author/1"){
@@ -777,13 +851,17 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.get("/author/a"){
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Bad Request\"}"
                 }
             }
             //検証
@@ -818,13 +896,17 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.get("/author/1"){
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.NotFound
-                    bodyAsText() shouldBeEqual "{\"error\":\"NotFound\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Not Found\"}"
                 }
             }
             //検証
@@ -859,13 +941,17 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.get("/author/1"){
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.InternalServerError
-                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Internal Server Error\"}"
                 }
             }
             //検証
@@ -902,13 +988,17 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.get("/author/1"){
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.InternalServerError
-                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Internal Server Error\"}"
                 }
             }
             //検証
@@ -945,6 +1035,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.put("/author/1"){
                     contentType(ContentType.Application.Json)
@@ -977,6 +1071,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.put("/author/"){
                     contentType(ContentType.Application.Json)
@@ -985,7 +1083,7 @@ class AuthorControllerTest: FunSpec({
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.NotFound
-                    bodyAsText() shouldBeEqual "{\"error\":\"NotFound\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Not Found\"}"
                 }
             }
         }
@@ -995,6 +1093,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.put("/author/a"){
                     contentType(ContentType.Application.Json)
@@ -1003,7 +1105,7 @@ class AuthorControllerTest: FunSpec({
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Bad Request\"}"
                 }
             }
         }
@@ -1028,6 +1130,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.put("/author/1"){
                     contentType(ContentType.Application.Json)
@@ -1036,7 +1142,7 @@ class AuthorControllerTest: FunSpec({
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.NotFound
-                    bodyAsText() shouldBeEqual "{\"error\":\"NotFound\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Not Found\"}"
                 }
             }
         }
@@ -1047,6 +1153,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.put("/author/1"){
                     contentType(ContentType.Application.Json)
@@ -1054,8 +1164,8 @@ class AuthorControllerTest: FunSpec({
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
-                    status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    status shouldBeEqual HttpStatusCode.UnsupportedMediaType
+                    bodyAsText() shouldBeEqual "{\"error\":\"Unsupported Media Type\"}"
                 }
             }
         }
@@ -1066,6 +1176,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.put("/author/1"){
                     contentType(ContentType.Application.FormUrlEncoded)
@@ -1073,8 +1187,8 @@ class AuthorControllerTest: FunSpec({
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
-                    status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    status shouldBeEqual HttpStatusCode.UnsupportedMediaType
+                    bodyAsText() shouldBeEqual "{\"error\":\"Unsupported Media Type\"}"
                 }
             }
         }
@@ -1085,15 +1199,19 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.put("/author/1"){
-                    contentType(ContentType.Application.FormUrlEncoded)
+                    contentType(ContentType.Application.Json)
                     setBody("{\"memo\": \"\",\"author_alias\": []}")
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Bad Request\"}"
                 }
             }
         }
@@ -1104,15 +1222,19 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.put("/author/1"){
-                    contentType(ContentType.Application.FormUrlEncoded)
+                    contentType(ContentType.Application.Json)
                     setBody("{\"name\": \"test1\",\"author_alias\": []}")
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Bad Request\"}"
                 }
             }
         }
@@ -1123,15 +1245,19 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.put("/author/1"){
-                    contentType(ContentType.Application.FormUrlEncoded)
+                    contentType(ContentType.Application.Json)
                     setBody("{\"name\": \"test1\",\"memo\": \"\"}")
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Bad Request\"}"
                 }
             }
         }
@@ -1157,6 +1283,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.put("/author/1"){
                     contentType(ContentType.Application.Json)
@@ -1165,7 +1295,7 @@ class AuthorControllerTest: FunSpec({
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.InternalServerError
-                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Internal Server Error\"}"
                 }
             }
             //検証
@@ -1200,6 +1330,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.put("/author/1"){
                     contentType(ContentType.Application.Json)
@@ -1208,7 +1342,7 @@ class AuthorControllerTest: FunSpec({
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.NotFound
-                    bodyAsText() shouldBeEqual "{\"error\":\"NotFound\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Not Found\"}"
                 }
             }
             //検証
@@ -1227,6 +1361,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.put("/author/1"){
                     contentType(ContentType.Application.Json)
@@ -1235,7 +1373,7 @@ class AuthorControllerTest: FunSpec({
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Bad Request\"}"
                 }
             }
         }
@@ -1261,6 +1399,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.put("/author/1"){
                     contentType(ContentType.Application.Json)
@@ -1269,7 +1411,7 @@ class AuthorControllerTest: FunSpec({
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.InternalServerError
-                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Internal Server Error\"}"
                 }
             }
             //検証
@@ -1306,6 +1448,10 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.delete("/author/1"){
                 }.apply {
@@ -1332,13 +1478,17 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.delete("/author/"){
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.NotFound
-                    bodyAsText() shouldBeEqual "{\"error\":\"NotFound\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Not Found\"}"
                 }
             }
         }
@@ -1349,13 +1499,17 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.delete("/author/a"){
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.BadRequest
-                    bodyAsText() shouldBeEqual "{\"error\":\"BadRequest\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Bad Request\"}"
                 }
             }
         }
@@ -1377,13 +1531,17 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.delete("/author/1"){
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.NotFound
-                    bodyAsText() shouldBeEqual "{\"error\":\"NotFound\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Not Found\"}"
                 }
             }
             //検証
@@ -1410,13 +1568,17 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.delete("/author/1"){
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.InternalServerError
-                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Internal Server Error\"}"
                 }
             }
             //検証
@@ -1447,13 +1609,17 @@ class AuthorControllerTest: FunSpec({
                 environment {
                     config = ApplicationConfig("application_local.yaml")
                 }
+                //検証対象のRouteをロード
+                routing {
+                    authorController()
+                }
                 // 実行(リクエスト)
                 client.delete("/author/1"){
                 }.apply {
                     //検証(リクエスト)
                     logger.info(bodyAsText())
                     status shouldBeEqual HttpStatusCode.InternalServerError
-                    bodyAsText() shouldBeEqual "{\"error\":\"ServerError\"}"
+                    bodyAsText() shouldBeEqual "{\"error\":\"Internal Server Error\"}"
                 }
             }
             //検証

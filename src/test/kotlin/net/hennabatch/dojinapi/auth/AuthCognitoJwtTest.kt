@@ -1,4 +1,4 @@
-package net.hennabatch.dojinapi.security
+package net.hennabatch.dojinapi.auth
 
 import aws.smithy.kotlin.runtime.net.url.Url
 import com.auth0.jwk.JwkProviderBuilder
@@ -80,7 +80,7 @@ class AuthCognitoJwtTest: FunSpec({
                     }
                     application {
                         routing {
-                            authenticate("jwt") {
+                            authenticate(AUTH_COGNITO_NAME) {
                                 get("/") {
                                     call.respondText("Hello World!")
                                 }
@@ -130,7 +130,7 @@ class AuthCognitoJwtTest: FunSpec({
                 }
                 application {
                     routing {
-                        authenticate("jwt") {
+                        authenticate(AUTH_COGNITO_NAME) {
                             get("/") {
                                 call.respondText("Hello World!")
                             }
@@ -175,7 +175,7 @@ class AuthCognitoJwtTest: FunSpec({
                 }
                 application {
                     routing {
-                        authenticate("jwt") {
+                        authenticate(AUTH_COGNITO_NAME) {
                             get("/") {
                                 call.respondText("Hello World!")
                             }
@@ -232,7 +232,7 @@ class AuthCognitoJwtTest: FunSpec({
                 }
                 application {
                     routing {
-                        authenticate("jwt") {
+                        authenticate(AUTH_COGNITO_NAME) {
                             get("/") {
                                 call.respondText("Hello World!")
                             }

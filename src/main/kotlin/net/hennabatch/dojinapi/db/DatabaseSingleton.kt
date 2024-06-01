@@ -17,11 +17,13 @@ object DatabaseSingleton {
     }
 
     fun connect(jdbcUrl: String, userName: String, password: String){
-        val database = Database.connect(createHikariDataSource(
-            url = jdbcUrl,
-            userName = userName,
-            pass = password
-        ))
+        val database = Database.connect(
+            createHikariDataSource(
+                url = jdbcUrl,
+                userName = userName,
+                pass = password
+            )
+        )
     }
 
     private fun createHikariDataSource(

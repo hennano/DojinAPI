@@ -1,6 +1,5 @@
 package net.hennabatch.dojinapi.db.columntype
 
-import net.hennabatch.dojinapi.db.table.AllowFullAccessIpTable
 import org.jetbrains.exposed.sql.ColumnType
 import org.jetbrains.exposed.sql.Table
 import java.net.InetAddress

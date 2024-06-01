@@ -14,13 +14,13 @@ import io.kotest.matchers.kotlinx.datetime.shouldBeAfter
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.*
 import net.hennabatch.dojinapi.common.utils.logger
-import net.hennabatch.dojinapi.db.DatabaseSingleton
+import net.hennabatch.dojinapi.db.DatabaseSingleton.dbQuery
 import net.hennabatch.dojinapi.db.model.Author
 import net.hennabatch.dojinapi.db.model.AuthorAlias
 import org.jetbrains.exposed.dao.exceptions.EntityNotFoundException
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.postgresql.util.PSQLException
 import java.time.format.DateTimeFormatter
 
 class AuthorAliasRepositoryTest: FunSpec({
@@ -30,7 +30,7 @@ class AuthorAliasRepositoryTest: FunSpec({
     val pass = "localuserpass"
 
     beforeTest {
-        DatabaseSingleton.connect(jdbcUrl, userName, pass)
+        net.hennabatch.dojinapi.db.DatabaseSingleton.connect(jdbcUrl, userName, pass)
     }
 
     beforeEach {
@@ -50,7 +50,7 @@ class AuthorAliasRepositoryTest: FunSpec({
                 TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 1, '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
-            val res = DatabaseSingleton.dbQuery {
+            val res = dbQuery {
                 AuthorAliasRepository.select(1, 0)
             }
 
@@ -68,7 +68,7 @@ class AuthorAliasRepositoryTest: FunSpec({
         test("データなし"){
             //実行
             shouldThrow<EntityNotFoundException> {
-                DatabaseSingleton.dbQuery {
+                dbQuery {
                     AuthorAliasRepository.select(1, 0)
                 }
             }
@@ -87,7 +87,7 @@ class AuthorAliasRepositoryTest: FunSpec({
                 TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 2, '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
-            val aliases = DatabaseSingleton.dbQuery {
+            val aliases = dbQuery {
                 AuthorAliasRepository.selectsByAuthorId(1, 0)
             }
 
@@ -110,7 +110,7 @@ class AuthorAliasRepositoryTest: FunSpec({
                 TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 2, '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
-            val aliases = DatabaseSingleton.dbQuery {
+            val aliases = dbQuery {
                 AuthorAliasRepository.selectsByAuthorId(2, 0)
             }
 
@@ -135,7 +135,7 @@ class AuthorAliasRepositoryTest: FunSpec({
                 TransactionManager.current().exec("INSERT INTO djla.author_alias values (2, 3, 1, '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
-            val aliases = DatabaseSingleton.dbQuery {
+            val aliases = dbQuery {
                 AuthorAliasRepository.selectsByAuthorId(1, 0)
             }
 
@@ -153,7 +153,7 @@ class AuthorAliasRepositoryTest: FunSpec({
 
         test("データなし"){
             //実行
-            val aliases = DatabaseSingleton.dbQuery {
+            val aliases = dbQuery {
                 AuthorAliasRepository.selectsByAuthorId(1, 0)
             }
             aliases.shouldBeEmpty()
@@ -172,15 +172,15 @@ class AuthorAliasRepositoryTest: FunSpec({
 
 
             //実行
-            val id = DatabaseSingleton.dbQuery {
-                AuthorAliasRepository.insert(1,1)
+            val id = dbQuery {
+                AuthorAliasRepository.insert(1, 1)
             }
 
             //検証
             id shouldBeGreaterThan 0
 
-            val res = DatabaseSingleton.dbQuery {
-                AuthorAliasRepository.select(1, 0)
+            val res = dbQuery {
+                AuthorAliasRepository.select(id, 0)
             }
 
             //検証
@@ -194,9 +194,9 @@ class AuthorAliasRepositoryTest: FunSpec({
 
         test("登録_該当のAuthorなし"){
             //実行
-            shouldThrow<PSQLException> {
-                DatabaseSingleton.dbQuery {
-                    AuthorAliasRepository.insert(1,1)
+            shouldThrow<ExposedSQLException> {
+                dbQuery {
+                    AuthorAliasRepository.insert(1, 1)
                 }
             }
         }
@@ -212,7 +212,7 @@ class AuthorAliasRepositoryTest: FunSpec({
                 TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 1, '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
-            val result = DatabaseSingleton.dbQuery {
+            val result = dbQuery {
                 AuthorAliasRepository.delete(1)
             }
 
@@ -220,14 +220,14 @@ class AuthorAliasRepositoryTest: FunSpec({
             result.shouldBeTrue()
 
             shouldThrow<EntityNotFoundException> {
-                DatabaseSingleton.dbQuery {
+                dbQuery {
                     AuthorAliasRepository.select(1, 0)
                 }
             }
         }
         test("削除対象なし"){
             //実行
-            val result = DatabaseSingleton.dbQuery {
+            val result = dbQuery {
                 AuthorAliasRepository.delete(1)
             }
 
@@ -251,7 +251,7 @@ class AuthorAliasRepositoryTest: FunSpec({
             }
 
             //実行
-            val result = DatabaseSingleton.dbQuery {
+            val result = dbQuery {
                 AuthorAliasRepository.deletesIncludedByAuthorId(1)
             }
 
@@ -259,17 +259,17 @@ class AuthorAliasRepositoryTest: FunSpec({
             result shouldBe 2
 
             shouldThrow<EntityNotFoundException> {
-                DatabaseSingleton.dbQuery {
+                dbQuery {
                     AuthorAliasRepository.select(1, 0)
                 }
             }
             shouldThrow<EntityNotFoundException> {
-                DatabaseSingleton.dbQuery {
+                dbQuery {
                     AuthorAliasRepository.select(2, 0)
                 }
             }
             shouldNotThrow<EntityNotFoundException> {
-                DatabaseSingleton.dbQuery {
+                dbQuery {
                     AuthorAliasRepository.select(3, 0)
                 }
             }
@@ -289,7 +289,7 @@ class AuthorAliasRepositoryTest: FunSpec({
             }
 
             //実行
-            val result = DatabaseSingleton.dbQuery {
+            val result = dbQuery {
                 AuthorAliasRepository.deletesIncludedByAuthorId(3)
             }
 
@@ -297,17 +297,17 @@ class AuthorAliasRepositoryTest: FunSpec({
             result shouldBe 2
 
             shouldNotThrow<EntityNotFoundException> {
-                DatabaseSingleton.dbQuery {
+                dbQuery {
                     AuthorAliasRepository.select(1, 0)
                 }
             }
             shouldThrow<EntityNotFoundException> {
-                DatabaseSingleton.dbQuery {
+                dbQuery {
                     AuthorAliasRepository.select(2, 0)
                 }
             }
             shouldThrow<EntityNotFoundException> {
-                DatabaseSingleton.dbQuery {
+                dbQuery {
                     AuthorAliasRepository.select(3, 0)
                 }
             }
@@ -327,7 +327,7 @@ class AuthorAliasRepositoryTest: FunSpec({
             }
 
             //実行
-            val result = DatabaseSingleton.dbQuery {
+            val result = dbQuery {
                 AuthorAliasRepository.deletesIncludedByAuthorId(2)
             }
 
@@ -335,17 +335,17 @@ class AuthorAliasRepositoryTest: FunSpec({
             result shouldBe 2
 
             shouldThrow<EntityNotFoundException> {
-                DatabaseSingleton.dbQuery {
+                dbQuery {
                     AuthorAliasRepository.select(1, 0)
                 }
             }
             shouldNotThrow<EntityNotFoundException> {
-                DatabaseSingleton.dbQuery {
+                dbQuery {
                     AuthorAliasRepository.select(2, 0)
                 }
             }
             shouldThrow<EntityNotFoundException> {
-                DatabaseSingleton.dbQuery {
+                dbQuery {
                     AuthorAliasRepository.select(3, 0)
                 }
             }
@@ -365,7 +365,7 @@ class AuthorAliasRepositoryTest: FunSpec({
             }
 
             //実行
-            val result = DatabaseSingleton.dbQuery {
+            val result = dbQuery {
                 AuthorAliasRepository.deletesIncludedByAuthorId(4)
             }
 
@@ -373,17 +373,17 @@ class AuthorAliasRepositoryTest: FunSpec({
             result shouldBe 0
 
             shouldNotThrow<EntityNotFoundException> {
-                DatabaseSingleton.dbQuery {
+                dbQuery {
                     AuthorAliasRepository.select(1, 0)
                 }
             }
             shouldNotThrow<EntityNotFoundException> {
-                DatabaseSingleton.dbQuery {
+                dbQuery {
                     AuthorAliasRepository.select(2, 0)
                 }
             }
             shouldNotThrow<EntityNotFoundException> {
-                DatabaseSingleton.dbQuery {
+                dbQuery {
                     AuthorAliasRepository.select(3, 0)
                 }
             }

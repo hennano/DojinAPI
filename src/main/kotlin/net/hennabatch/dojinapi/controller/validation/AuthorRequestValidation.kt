@@ -5,10 +5,15 @@ import net.hennabatch.dojinapi.controller.entity.AuthorRequestEntity
 
 fun RequestValidationConfig.authorRequestValidation(){
     validate<AuthorRequestEntity>{
-        if(it.name.isBlank()){
-            ValidationResult.Invalid("")
-        }else{
-            ValidationResult.Valid
+        if(it.name.isNullOrBlank()) {
+            return@validate ValidationResult.Invalid("")
         }
+        if(it.memo == null){
+            return@validate ValidationResult.Invalid("")
+        }
+        if(it.authorAlias == null){
+            return@validate ValidationResult.Invalid("")
+        }
+        return@validate ValidationResult.Valid
     }
 }
