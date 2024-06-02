@@ -9,7 +9,7 @@ import io.ktor.server.resources.post
 import io.ktor.server.resources.put
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import net.hennabatch.dojinapi.controller.entity.AuthorRequestEntity
+import net.hennabatch.dojinapi.controller.request.AuthorRequestEntity
 import net.hennabatch.dojinapi.logic.AuthorControllerLogic
 import net.hennabatch.dojinapi.views.AuthorResponse
 import org.koin.ktor.ext.inject
