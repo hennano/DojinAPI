@@ -3,7 +3,7 @@ package net.hennabatch.dojinapi.init
 import io.kotest.core.spec.style.FunSpec
 import aws.smithy.kotlin.runtime.net.url.Url
 import io.kotest.matchers.shouldNotBe
-import net.hennabatch.dojinapi.db.DatabaseSingleton
+import net.hennabatch.dojinapi.db.HikariCpDb
 
 class InitTest: FunSpec({
     val region = "ap-northeast-1"
@@ -47,7 +47,7 @@ class InitTest: FunSpec({
         }
 
         test("rds"){
-            DatabaseSingleton.connect(jdbcUrl, userName, pass)
+            HikariCpDb().connect(jdbcUrl, userName, pass)
             InitDB.createAllTable()
         }
     }
@@ -69,7 +69,7 @@ class InitTest: FunSpec({
             )
         }
         test("rds"){
-            DatabaseSingleton.connect(jdbcUrl, userName, pass)
+            HikariCpDb().connect(jdbcUrl, userName, pass)
             InitDB.dropAllTable()
         }
     }

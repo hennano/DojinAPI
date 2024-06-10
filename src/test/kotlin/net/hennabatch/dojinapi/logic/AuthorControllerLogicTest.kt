@@ -32,7 +32,7 @@ class AuthorControllerLogicTest : FunSpec({
             every { AuthorAliasRepository.delete(any())} returns true
 
             //実行
-            AuthorControllerLogic().updateAuthorAliases(1, listOf())
+            AuthorServiceLogic().updateAuthorAliases(1, listOf())
 
             //検証
             verify(exactly = 1) {
@@ -59,7 +59,7 @@ class AuthorControllerLogicTest : FunSpec({
             every { AuthorAliasRepository.delete(any())} returns true
 
             //実行
-            AuthorControllerLogic().updateAuthorAliases(1, listOf())
+            AuthorServiceLogic().updateAuthorAliases(1, listOf())
 
             //検証
             verify(exactly = 1) {
@@ -81,7 +81,7 @@ class AuthorControllerLogicTest : FunSpec({
             every { AuthorAliasRepository.delete(any())} returns true
 
             //実行
-            AuthorControllerLogic().updateAuthorAliases(1, listOf(2))
+            AuthorServiceLogic().updateAuthorAliases(1, listOf(2))
 
             //検証
             verify(exactly = 1) {
@@ -108,7 +108,7 @@ class AuthorControllerLogicTest : FunSpec({
             every { AuthorAliasRepository.delete(any())} returns true
 
             //実行
-            AuthorControllerLogic().updateAuthorAliases(1, listOf(2))
+            AuthorServiceLogic().updateAuthorAliases(1, listOf(2))
 
             //検証
             verify(exactly = 1) {
@@ -139,7 +139,7 @@ class AuthorControllerLogicTest : FunSpec({
             every { AuthorAliasRepository.delete(any())} returns true
 
             //実行
-            AuthorControllerLogic().updateAuthorAliases(1, listOf(2, 3))
+            AuthorServiceLogic().updateAuthorAliases(1, listOf(2, 3))
 
             //検証
             verify(exactly = 1) {

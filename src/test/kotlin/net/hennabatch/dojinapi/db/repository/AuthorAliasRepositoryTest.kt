@@ -14,7 +14,7 @@ import io.kotest.matchers.kotlinx.datetime.shouldBeAfter
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.*
 import net.hennabatch.dojinapi.common.utils.logger
-import net.hennabatch.dojinapi.db.DatabaseSingleton.dbQuery
+import net.hennabatch.dojinapi.db.HikariCpDb
 import net.hennabatch.dojinapi.db.model.Author
 import net.hennabatch.dojinapi.db.model.AuthorAlias
 import org.jetbrains.exposed.dao.exceptions.EntityNotFoundException
@@ -28,9 +28,10 @@ class AuthorAliasRepositoryTest: FunSpec({
     val jdbcUrl = "jdbc:postgresql://localhost:5432/DOJINLIB?currentSchema=djla"
     val userName = "user"
     val pass = "localuserpass"
+    val db = HikariCpDb()
 
     beforeTest {
-        net.hennabatch.dojinapi.db.DatabaseSingleton.connect(jdbcUrl, userName, pass)
+        db.connect(jdbcUrl, userName, pass)
     }
 
     beforeEach {
@@ -50,7 +51,7 @@ class AuthorAliasRepositoryTest: FunSpec({
                 TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 1, '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
-            val res = dbQuery {
+            val res = db.dbQuery {
                 AuthorAliasRepository.select(1, 0)
             }
 
@@ -68,7 +69,7 @@ class AuthorAliasRepositoryTest: FunSpec({
         test("データなし"){
             //実行
             shouldThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.select(1, 0)
                 }
             }
@@ -87,7 +88,7 @@ class AuthorAliasRepositoryTest: FunSpec({
                 TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 2, '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
-            val aliases = dbQuery {
+            val aliases = db.dbQuery {
                 AuthorAliasRepository.selectsByAuthorId(1, 0)
             }
 
@@ -110,7 +111,7 @@ class AuthorAliasRepositoryTest: FunSpec({
                 TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 2, '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
-            val aliases = dbQuery {
+            val aliases = db.dbQuery {
                 AuthorAliasRepository.selectsByAuthorId(2, 0)
             }
 
@@ -135,7 +136,7 @@ class AuthorAliasRepositoryTest: FunSpec({
                 TransactionManager.current().exec("INSERT INTO djla.author_alias values (2, 3, 1, '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
-            val aliases = dbQuery {
+            val aliases = db.dbQuery {
                 AuthorAliasRepository.selectsByAuthorId(1, 0)
             }
 
@@ -153,7 +154,7 @@ class AuthorAliasRepositoryTest: FunSpec({
 
         test("データなし"){
             //実行
-            val aliases = dbQuery {
+            val aliases = db.dbQuery {
                 AuthorAliasRepository.selectsByAuthorId(1, 0)
             }
             aliases.shouldBeEmpty()
@@ -172,14 +173,14 @@ class AuthorAliasRepositoryTest: FunSpec({
 
 
             //実行
-            val id = dbQuery {
+            val id = db.dbQuery {
                 AuthorAliasRepository.insert(1, 1)
             }
 
             //検証
             id shouldBeGreaterThan 0
 
-            val res = dbQuery {
+            val res = db.dbQuery {
                 AuthorAliasRepository.select(id, 0)
             }
 
@@ -195,7 +196,7 @@ class AuthorAliasRepositoryTest: FunSpec({
         test("登録_該当のAuthorなし"){
             //実行
             shouldThrow<ExposedSQLException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.insert(1, 1)
                 }
             }
@@ -212,7 +213,7 @@ class AuthorAliasRepositoryTest: FunSpec({
                 TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 1, '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
-            val result = dbQuery {
+            val result = db.dbQuery {
                 AuthorAliasRepository.delete(1)
             }
 
@@ -220,14 +221,14 @@ class AuthorAliasRepositoryTest: FunSpec({
             result.shouldBeTrue()
 
             shouldThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.select(1, 0)
                 }
             }
         }
         test("削除対象なし"){
             //実行
-            val result = dbQuery {
+            val result = db.dbQuery {
                 AuthorAliasRepository.delete(1)
             }
 
@@ -251,7 +252,7 @@ class AuthorAliasRepositoryTest: FunSpec({
             }
 
             //実行
-            val result = dbQuery {
+            val result = db.dbQuery {
                 AuthorAliasRepository.deletesIncludedByAuthorId(1)
             }
 
@@ -259,17 +260,17 @@ class AuthorAliasRepositoryTest: FunSpec({
             result shouldBe 2
 
             shouldThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.select(1, 0)
                 }
             }
             shouldThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.select(2, 0)
                 }
             }
             shouldNotThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.select(3, 0)
                 }
             }
@@ -289,7 +290,7 @@ class AuthorAliasRepositoryTest: FunSpec({
             }
 
             //実行
-            val result = dbQuery {
+            val result = db.dbQuery {
                 AuthorAliasRepository.deletesIncludedByAuthorId(3)
             }
 
@@ -297,17 +298,17 @@ class AuthorAliasRepositoryTest: FunSpec({
             result shouldBe 2
 
             shouldNotThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.select(1, 0)
                 }
             }
             shouldThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.select(2, 0)
                 }
             }
             shouldThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.select(3, 0)
                 }
             }
@@ -327,7 +328,7 @@ class AuthorAliasRepositoryTest: FunSpec({
             }
 
             //実行
-            val result = dbQuery {
+            val result = db.dbQuery {
                 AuthorAliasRepository.deletesIncludedByAuthorId(2)
             }
 
@@ -335,17 +336,17 @@ class AuthorAliasRepositoryTest: FunSpec({
             result shouldBe 2
 
             shouldThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.select(1, 0)
                 }
             }
             shouldNotThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.select(2, 0)
                 }
             }
             shouldThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.select(3, 0)
                 }
             }
@@ -365,7 +366,7 @@ class AuthorAliasRepositoryTest: FunSpec({
             }
 
             //実行
-            val result = dbQuery {
+            val result = db.dbQuery {
                 AuthorAliasRepository.deletesIncludedByAuthorId(4)
             }
 
@@ -373,17 +374,17 @@ class AuthorAliasRepositoryTest: FunSpec({
             result shouldBe 0
 
             shouldNotThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.select(1, 0)
                 }
             }
             shouldNotThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.select(2, 0)
                 }
             }
             shouldNotThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorAliasRepository.select(3, 0)
                 }
             }

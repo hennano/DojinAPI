@@ -5,8 +5,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toJavaLocalDateTime
-import net.hennabatch.dojinapi.db.DatabaseSingleton
-import net.hennabatch.dojinapi.db.DatabaseSingleton.dbQuery
+import net.hennabatch.dojinapi.db.HikariCpDb
 import net.hennabatch.dojinapi.db.model.Circle
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -17,9 +16,10 @@ class CircleRepositoryTest: FunSpec({
     val jdbcUrl = "jdbc:postgresql://localhost:5432/DOJINLIB?currentSchema=djla"
     val userName = "user"
     val pass = "localuserpass"
+    val db = HikariCpDb()
 
     beforeTest {
-        DatabaseSingleton.connect(jdbcUrl, userName, pass)
+        db.connect(jdbcUrl, userName, pass)
     }
 
     beforeEach{
@@ -45,7 +45,7 @@ class CircleRepositoryTest: FunSpec({
                     .exec("INSERT INTO djla.circle values (3, 'test3', 'memomemo3', '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
-            val circles = dbQuery {
+            val circles = db.dbQuery {
                 CircleRepository.selectAll(0)
             }
 
@@ -64,7 +64,7 @@ class CircleRepositoryTest: FunSpec({
 
         test("データなし"){
             //実行
-            val circles = dbQuery {
+            val circles = db.dbQuery {
                 CircleRepository.selectAll(0)
             }
 

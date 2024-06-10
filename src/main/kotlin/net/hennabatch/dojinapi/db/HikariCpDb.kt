@@ -7,9 +7,11 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
-object DatabaseSingleton {
+class HikariCpDb: CommonDb {
 
-    fun init(config: ApplicationConfig){
+    private lateinit var db: Database
+
+    override fun init(config: ApplicationConfig){
         val jdbcUrl = config.property("dojinapi.db.url").getString()
         val userName = config.property("dojinapi.db.userName").getString()
         val password = config.property("dojinapi.db.password").getString()
@@ -17,7 +19,7 @@ object DatabaseSingleton {
     }
 
     fun connect(jdbcUrl: String, userName: String, password: String){
-        val database = Database.connect(
+        db = Database.connect(
             createHikariDataSource(
                 url = jdbcUrl,
                 userName = userName,
@@ -43,6 +45,6 @@ object DatabaseSingleton {
         }
     )
 
-    suspend fun <T> dbQuery(block: suspend () -> T): T =
-        newSuspendedTransaction(Dispatchers.IO) { block() }
+    override suspend fun <T> dbQuery(block: suspend () -> T): T =
+        newSuspendedTransaction(Dispatchers.IO, db) { block() }
 }

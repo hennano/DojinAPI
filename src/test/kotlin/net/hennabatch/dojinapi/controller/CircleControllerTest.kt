@@ -11,7 +11,6 @@ import io.ktor.server.testing.*
 import io.mockk.*
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import net.hennabatch.dojinapi.db.DatabaseSingleton
 import net.hennabatch.dojinapi.db.model.Circle
 import net.hennabatch.dojinapi.logic.CircleControllerLogic
 import net.hennabatch.dojinapi.views.CircleResponse
@@ -24,8 +23,8 @@ class CircleControllerTest: FunSpec({
 
     beforeEach {
         //DBは使わないのでモックして無効化する
-        mockkObject(objects = arrayOf(DatabaseSingleton), recordPrivateCalls = true)
-        every { DatabaseSingleton.init(any()) } just Runs
+        //mockkObject(objects = arrayOf(DatabaseSingleton), recordPrivateCalls = true)
+        //every { DatabaseSingleton.init(any()) } just Runs
         //デフォルトのルートを無効化する
         mockkStatic(Application::configRouting.declaringKotlinFile)
         every { (Application::configRouting)(any()) } just Runs

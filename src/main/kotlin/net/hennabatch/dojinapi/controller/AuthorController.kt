@@ -10,51 +10,42 @@ import io.ktor.server.resources.put
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import net.hennabatch.dojinapi.controller.request.AuthorRequestEntity
-import net.hennabatch.dojinapi.logic.AuthorControllerLogic
-import net.hennabatch.dojinapi.views.AuthorResponse
+import net.hennabatch.dojinapi.service.AuthorService
 import org.koin.ktor.ext.inject
 
 fun Route.authorController(){
 
-    val authorControllerLogic by inject<AuthorControllerLogic>()
-    val authorResponse by inject<AuthorResponse>()
+    val authorService by inject<AuthorService>()
 
     @Resource("/author")
     class AuthorLocation()
     get<AuthorLocation> {
-        val authors = authorControllerLogic.fetchAllAuthors()
-        val res = authorResponse.makeAuthorListFetched(authors)
-        call.respond(HttpStatusCode.OK, res)
+        call.respond(HttpStatusCode.OK, authorService.getAuthors())
     }
 
     post<AuthorLocation>{
         val req = call.receive<AuthorRequestEntity>()
-        val id = authorControllerLogic.insertAuthor(name = req.name!!, memo = req.memo!!, authorAlias = req.authorAlias!!)
-        val res = authorResponse.makeAuthorCreated(id, req.name)
-        call.respond(HttpStatusCode.OK, res)
+        call.respond(HttpStatusCode.OK, authorService.postAuthor(req))
     }
 
     @Resource("/author/{authorId}")
     class AuthorDetailLocation(val authorId: Int)
     get<AuthorDetailLocation> { param ->
         val authorId = param.authorId
-        val authorDetail = authorControllerLogic.fetchAuthor(authorId)
-        val res = authorResponse.makeAuthorFetched(authorDetail.first, authorDetail.second)
-        call.respond(HttpStatusCode.OK, res)
+        call.respond(HttpStatusCode.OK, authorService.getAuthor(authorId))
     }
 
     put<AuthorDetailLocation>{ param ->
         val req = call.receive<AuthorRequestEntity>()
         val authorId = param.authorId
-        val id = authorControllerLogic.updateAuthor(id = authorId, name = req.name!!, memo = req.memo!!, authorAlias = req.authorAlias!!)
-        val res = authorResponse.makeAuthorUpdated(id, req.name)
-        call.respond(HttpStatusCode.OK, res)
+        call.respond(HttpStatusCode.OK, authorService.putAuthor(authorId, req))
     }
 
     delete<AuthorDetailLocation> { param ->
         val authorId = param.authorId
-        val isSucceededInDeletion = authorControllerLogic.deleteAuthor(authorId)
-        val res = authorResponse.makeAuthorDeleted(isSucceededInDeletion)
-        call.respond(HttpStatusCode.OK, res)
+        call.respond(HttpStatusCode.OK, authorService.deleteAuthor(authorId))
     }
 }
+
+
+

@@ -12,8 +12,7 @@ import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.kotlinx.datetime.shouldBeAfter
 import kotlinx.datetime.*
-import net.hennabatch.dojinapi.db.DatabaseSingleton
-import net.hennabatch.dojinapi.db.DatabaseSingleton.dbQuery
+import net.hennabatch.dojinapi.db.HikariCpDb
 import net.hennabatch.dojinapi.db.model.Author
 import org.jetbrains.exposed.dao.exceptions.EntityNotFoundException
 import org.jetbrains.exposed.sql.transactions.TransactionManager
@@ -25,9 +24,10 @@ class AuthorRepositoryTest: FunSpec({
     val jdbcUrl = "jdbc:postgresql://localhost:5432/DOJINLIB?currentSchema=djla"
     val userName = "user"
     val pass = "localuserpass"
+    val db = HikariCpDb()
 
     beforeTest {
-        DatabaseSingleton.connect(jdbcUrl, userName, pass)
+        db.connect(jdbcUrl, userName, pass)
     }
 
     beforeEach{
@@ -47,7 +47,7 @@ class AuthorRepositoryTest: FunSpec({
                 TransactionManager.current().exec("INSERT INTO djla.author values (1, 'test1', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
-            val res = dbQuery{
+            val res = db.dbQuery{
                 AuthorRepository.select(1, 0)
             }
 
@@ -66,7 +66,7 @@ class AuthorRepositoryTest: FunSpec({
                 TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, 1, '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
-            val res = dbQuery{
+            val res = db.dbQuery{
                 AuthorRepository.select(1, 1)
             }
 
@@ -90,7 +90,7 @@ class AuthorRepositoryTest: FunSpec({
                 TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
-            val res = dbQuery{
+            val res = db.dbQuery{
                 AuthorRepository.select(1, 1)
             }
 
@@ -105,14 +105,14 @@ class AuthorRepositoryTest: FunSpec({
         test("データなし"){
             //実行
             shouldThrow<EntityNotFoundException> {
-                dbQuery{
+                db.dbQuery{
                     AuthorRepository.select(1, 0)
                 }
             }
         }
     }
 
-    context("selectAll") {
+    context("selectAll"){
         test("データあり"){
             //準備
             val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
@@ -124,7 +124,7 @@ class AuthorRepositoryTest: FunSpec({
             }
 
             //実行
-            val authors = dbQuery{
+            val authors = db.dbQuery{
                 AuthorRepository.selectAll(0)
             }
 
@@ -141,7 +141,7 @@ class AuthorRepositoryTest: FunSpec({
 
         test("データなし"){
             //実行
-            val authors = dbQuery{
+            val authors = db.dbQuery{
                 AuthorRepository.selectAll(0)
             }
 
@@ -158,14 +158,14 @@ class AuthorRepositoryTest: FunSpec({
             val now = Clock.System.now()
 
             //実行
-            val id = dbQuery{
+            val id = db.dbQuery{
                 AuthorRepository.insert(name, memo)
             }
 
             //検証
             id shouldBeGreaterThan 0
 
-            val res = dbQuery{
+            val res = db.dbQuery{
                 AuthorRepository.select(id, 0)
             }
 
@@ -187,14 +187,14 @@ class AuthorRepositoryTest: FunSpec({
             }
 
             //実行
-            val result = dbQuery {
+            val result = db.dbQuery {
                 AuthorRepository.delete(1)
             }
 
             result.shouldBeTrue()
 
             shouldThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorRepository.select(1, 0)
                 }
             }
@@ -209,14 +209,14 @@ class AuthorRepositoryTest: FunSpec({
             }
 
             //実行
-            val result = dbQuery {
+            val result = db.dbQuery {
                 AuthorRepository.delete(2)
             }
 
             result.shouldBeFalse()
 
             shouldNotThrow<EntityNotFoundException> {
-                dbQuery {
+                db.dbQuery {
                     AuthorRepository.select(1, 0)
                 }
             }
