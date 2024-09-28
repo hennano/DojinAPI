@@ -41,19 +41,7 @@ class AuthorRequestEntityTest: FunSpec({
         }
 
         test("異常系_nameが存在しない"){
-            //準備
-            val entity = AuthorRequestEntity(
-                name = null,
-                memo = "testmemo",
-                authorAlias = listOf(1, 2)
-            )
-
-            //実行
-            val res = entity.validation()
-
-            //検証
-            res.result.shouldBeFalse()
-            res.reason shouldBeEqual "nameが空"
+            println("ありえないケース")
         }
 
         test("異常系_nameが空"){
@@ -88,19 +76,7 @@ class AuthorRequestEntityTest: FunSpec({
             res.reason shouldBeEqual "memoがない"
         }
         test("異常系_author_aliasが存在しない"){
-            //準備
-            val entity = AuthorRequestEntity(
-                name = "なまえ",
-                memo = "testmemo",
-                authorAlias = null
-            )
-
-            //実行
-            val res = entity.validation()
-
-            //検証
-            res.result.shouldBeFalse()
-            res.reason shouldBeEqual "authorAliasがない"
+            println("ありえないケース")
         }
     }
 })

@@ -38,7 +38,7 @@ class AuthorService: KoinComponent {
 
     suspend fun putAuthor(authorId: Int, requestEntity: AuthorRequestEntity):JsonObject{
         return db.dbQuery {
-            val id = authorServiceLogic.updateAuthor(id = authorId, name = requestEntity.name!!, memo = requestEntity.memo!!, authorAlias = requestEntity.authorAlias!!)
+            val id = authorServiceLogic.updateAuthor(id = authorId, name = requestEntity.name, memo = requestEntity.memo!!, authorAlias = requestEntity.authorAlias)
             return@dbQuery authorResponse.makeAuthorUpdated(id, requestEntity.name)
         }
     }

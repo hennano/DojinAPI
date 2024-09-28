@@ -1,4 +1,4 @@
-package net.hennabatch.dojinapi.it
+package net.hennabatch.dojinapi.e2e
 
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.equals.shouldBeEqual

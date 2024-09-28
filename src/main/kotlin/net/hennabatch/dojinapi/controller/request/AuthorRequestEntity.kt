@@ -5,19 +5,16 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AuthorRequestEntity(
-    @SerialName("name") val name: String?,
+    @SerialName("name") val name: String,
     @SerialName("memo") val memo: String?,
-    @SerialName("author_alias") val authorAlias: List<Int>?
+    @SerialName("author_alias") val authorAlias: List<Int>
 ): RequestEntity{
     override fun validation(): RequestValidationResult{
-        if(name.isNullOrBlank()) {
+        if(name.isBlank()) {
             return RequestValidationResult(false, "nameが空")
         }
         if(memo == null){
             return RequestValidationResult(false, "memoがない")
-        }
-        if(authorAlias == null){
-            return RequestValidationResult(false, "authorAliasがない")
         }
         return RequestValidationResult(true)
     }

@@ -5,6 +5,7 @@ import io.ktor.server.plugins.*
 import io.ktor.server.plugins.requestvalidation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.util.logging.*
+import kotlinx.serialization.SerializationException
 import org.jetbrains.exposed.dao.exceptions.EntityNotFoundException
 
 fun StatusPagesConfig.byException(){
@@ -14,10 +15,15 @@ fun StatusPagesConfig.byException(){
                 //バリデーションに失敗
                 showErrorResponse(call, HttpStatusCode.BadRequest)
             }
+            is SerializationException ->{
+                //json変換に失敗
+                showErrorResponse(call, HttpStatusCode.BadRequest)
+            }
             is BadRequestException ->{
                 //json変換に失敗
                 showErrorResponse(call, HttpStatusCode.BadRequest)
             }
+
             is EntityNotFoundException ->{
                 //見つからない
                 showErrorResponse(call, HttpStatusCode.NotFound)

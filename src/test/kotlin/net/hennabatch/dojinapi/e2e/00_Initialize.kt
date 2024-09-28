@@ -1,4 +1,4 @@
-package net.hennabatch.dojinapi.it
+package net.hennabatch.dojinapi.e2e
 
 import aws.smithy.kotlin.runtime.net.url.Url
 import io.kotest.core.spec.style.FunSpec
