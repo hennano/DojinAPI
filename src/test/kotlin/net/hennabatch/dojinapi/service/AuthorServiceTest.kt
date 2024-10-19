@@ -1,6 +1,7 @@
 package net.hennabatch.dojinapi.service
 
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -22,6 +23,7 @@ import net.hennabatch.dojinapi.db.TestableHikariCpDb
 import net.hennabatch.dojinapi.logic.AuthorServiceLogic
 import net.hennabatch.dojinapi.testutils.TestFlags.disableDBAccess
 import net.hennabatch.dojinapi.views.AuthorResponse
+import org.jetbrains.exposed.dao.exceptions.EntityNotFoundException
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.statements.StatementInterceptor
 import org.jetbrains.exposed.sql.transactions.TransactionManager
@@ -366,32 +368,14 @@ class AuthorServiceTest: FunSpec({
             resultMAuthorCircle.shouldBeEmpty()
         }
     }
-    /*
+
     context("getAuthor"){
-        test("正常系"){
+        test("正常系_最小").config(enabledOrReasonIf = disableDBAccess){
             //準備
-            val db = spyk<CommonDb>()
-
-            val expectedAuthor = Author(1, "test1", null, listOf(), null, null)
-
-            val authorRes =
-                expectedAuthor to listOf<AuthorAlias>()
-
-            val authorServiceLogicMock = mockk<AuthorServiceLogic>{
-                every { fetchAuthor(any())} returns authorRes
-            }
-
-            val resJson = JsonObject(mapOf())
-            val authorResponseMock = mockk<AuthorResponse>{
-                every { makeAuthorFetched(any(), any()) } returns resJson
-
-            }
-            startKoin {
-                modules(module{
-                    single<CommonDb>{db}
-                    single<AuthorServiceLogic>{authorServiceLogicMock}
-                    single<AuthorResponse>{authorResponseMock}
-                })
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
             }
 
             //実行
@@ -400,76 +384,117 @@ class AuthorServiceTest: FunSpec({
             }
 
             //検証
-            res shouldBeEqual resJson
-
-            verify(exactly = 1) {
-                authorServiceLogicMock.fetchAuthor(1)
-            }
-            confirmVerified(authorServiceLogicMock)
-            verify(exactly = 1) {
-                authorResponseMock.makeAuthorFetched(expectedAuthor, listOf())
-            }
-            confirmVerified(authorResponseMock)
+            res shouldBeEqual JsonObject(mapOf(
+                "id" to JsonPrimitive(1),
+                "name" to JsonPrimitive("testAuthor"),
+                "memo" to JsonPrimitive("memoAuthor1"),
+                "joined_circles" to JsonObject(mapOf()),
+                "author_alias" to JsonObject(mapOf()),
+                "created_at" to JsonPrimitive(strLocalDateTime),
+                "updated_at" to JsonPrimitive(strLocalDateTime),
+            ))
         }
 
-        test("異常系_AuthorServiceLogicでエラー"){
+        test("正常系_すべて").config(enabledOrReasonIf = disableDBAccess){
             //準備
-            val db = spyk<CommonDb>()
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor1', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (2, 'testAuthor2', 'memoAuthor2', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 2, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, '$strLocalDateTime', '$strLocalDateTime')")
+            }
 
-            val authors = listOf(
-                Author(1, "test1", null, listOf(), null, null)
-            )
+            //実行
+            val res = runBlocking {
+                AuthorService().getAuthor(1)
+            }
+
+            //検証
+            res shouldBeEqual JsonObject(mapOf(
+                "id" to JsonPrimitive(1),
+                "name" to JsonPrimitive("testAuthor1"),
+                "memo" to JsonPrimitive("memoAuthor1"),
+                "joined_circles" to JsonObject(mapOf(
+                    "1" to JsonPrimitive("testCircle")
+                )),
+                "author_alias" to JsonObject(mapOf(
+                    "2" to JsonPrimitive("testAuthor2")
+                )),
+                "created_at" to JsonPrimitive(strLocalDateTime),
+                "updated_at" to JsonPrimitive(strLocalDateTime),
+            ))
+        }
+
+        test("正常系_該当データなし").config(enabledOrReasonIf = disableDBAccess){
+            shouldThrow<EntityNotFoundException> {
+                runBlocking {
+                    AuthorService().getAuthor(1)
+                }
+            }
+        }
+
+        test("異常系_AuthorServiceLogicでエラー").config(enabledOrReasonIf = disableDBAccess){
+            //準備
             val authorServiceLogicMock = mockk<AuthorServiceLogic>{
-                every { fetchAllAuthors()} throws Exception()
+                every { fetchAuthor(any())} throws Exception()
             }
-            val resJson = JsonObject(mapOf())
-            val authorResponseMock = mockk<AuthorResponse>{
-                every { makeAuthorListFetched(any()) } returns resJson
 
+            var isRollBack = false
+            rollBackDetector = registerDetectionRollBack {
+                isRollBack = true
             }
+            db.statementInterceptors.add(rollBackDetector!!)
+
+            stopKoin()
             startKoin {
                 modules(module{
                     single<CommonDb>{db}
                     single<AuthorServiceLogic>{authorServiceLogicMock}
-                    single<AuthorResponse>{authorResponseMock}
+                    single<AuthorResponse>{AuthorResponse()}
                 })
             }
-
 
             //実行
             shouldThrowAny{
                 runBlocking {
-                    AuthorService().getAuthors()
+                    AuthorService().getAuthor(1)
                 }
             }
 
+            //実行確認
             verify(exactly = 1) {
-                authorServiceLogicMock.fetchAllAuthors()
+                authorServiceLogicMock.fetchAuthor(any())
             }
             confirmVerified(authorServiceLogicMock)
-            verify(exactly = 0) {
-                authorResponseMock.makeAuthorListFetched(authors)
-            }
-            confirmVerified(authorResponseMock)
+
+            //ロールバック検知
+            isRollBack.shouldBeTrue()
         }
 
-        test("異常系_AuthorResponseでエラー"){
+        test("異常系_AuthorResponseでエラー").config(enabledOrReasonIf = disableDBAccess){
             //準備
-            val db = spyk<CommonDb>()
-
-            val authors = listOf(
-                Author(1, "test1", null, listOf(), null, null)
-            )
-            val authorServiceLogicMock = mockk<AuthorServiceLogic>{
-                every { fetchAllAuthors()} returns authors
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
             }
             val authorResponseMock = mockk<AuthorResponse>{
-                every { makeAuthorListFetched(any()) } throws Exception()
+                every { makeAuthorFetched(any(), any())} throws Exception()
             }
+            var isRollBack = false
+            rollBackDetector = registerDetectionRollBack {
+                isRollBack = true
+            }
+            db.statementInterceptors.add(rollBackDetector!!)
+
+            stopKoin()
             startKoin {
                 modules(module{
                     single<CommonDb>{db}
-                    single<AuthorServiceLogic>{authorServiceLogicMock}
+                    single<AuthorServiceLogic>{AuthorServiceLogic()}
                     single<AuthorResponse>{authorResponseMock}
                 })
             }
@@ -477,20 +502,18 @@ class AuthorServiceTest: FunSpec({
             //実行
             shouldThrowAny{
                 runBlocking {
-                    AuthorService().getAuthors()
+                    AuthorService().getAuthor(1)
                 }
             }
 
             verify(exactly = 1) {
-                authorServiceLogicMock.fetchAllAuthors()
-            }
-            confirmVerified(authorServiceLogicMock)
-            verify(exactly = 1) {
-                authorResponseMock.makeAuthorListFetched(authors)
+                authorResponseMock.makeAuthorFetched(any(), any())
             }
             confirmVerified(authorResponseMock)
+            isRollBack.shouldBeTrue()
         }
     }
+    /*
 
     //TODO
     context("putAuthor"){
