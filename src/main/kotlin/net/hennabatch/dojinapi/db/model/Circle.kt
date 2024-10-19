@@ -2,7 +2,7 @@ package net.hennabatch.dojinapi.db.model
 
 import kotlinx.datetime.LocalDateTime
 
-class Circle (
+data class Circle (
     val id: Int,
     val name: String?,
     val memo: String?,

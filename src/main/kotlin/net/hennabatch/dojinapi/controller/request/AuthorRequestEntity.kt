@@ -7,7 +7,8 @@ import kotlinx.serialization.Serializable
 data class AuthorRequestEntity(
     @SerialName("name") val name: String,
     @SerialName("memo") val memo: String?,
-    @SerialName("author_alias") val authorAlias: List<Int>
+    @SerialName("author_alias") val authorAlias: List<Int>,
+    @SerialName("joined_circles") val joinedCircles: List<Int>
 ): RequestEntity{
     override fun validation(): RequestValidationResult{
         if(name.isBlank()) {

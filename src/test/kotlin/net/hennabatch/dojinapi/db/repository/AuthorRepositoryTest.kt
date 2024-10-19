@@ -53,7 +53,6 @@ class AuthorRepositoryTest: FunSpec({
 
             //検証
             val expected = Author(1, "test1", "memomemo1", listOf(), localDateTime, localDateTime)
-
             res shouldBeEqual expected
         }
 
@@ -63,7 +62,7 @@ class AuthorRepositoryTest: FunSpec({
             transaction {
                 TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
                 TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
-                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, 1, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, '$strLocalDateTime', '$strLocalDateTime')")
             }
             //実行
             val res = db.dbQuery{

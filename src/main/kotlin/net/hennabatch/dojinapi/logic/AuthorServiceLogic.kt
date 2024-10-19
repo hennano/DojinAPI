@@ -4,22 +4,31 @@ import net.hennabatch.dojinapi.db.model.Author
 import net.hennabatch.dojinapi.db.model.AuthorAlias
 import net.hennabatch.dojinapi.db.repository.AuthorAliasRepository
 import net.hennabatch.dojinapi.db.repository.AuthorRepository
+import net.hennabatch.dojinapi.db.repository.CircleRepository
+import net.hennabatch.dojinapi.db.repository.MAuthorCircleRepository
 
 class AuthorServiceLogic {
     fun fetchAllAuthors(): List<Author>{
         return AuthorRepository.selectAll(0)
     }
 
-    fun insertAuthor(name: String, memo: String, authorAlias: List<Int>): Int{
+    fun insertAuthor(name: String, memo: String, authorAlias: List<Int>, joinedCircles: List<Int>): Int{
         //authorAliasにあるIDが存在するIDか確認する
         authorAlias.forEach{
             //もし存在しなければEntityNotFoundExceptionが投げられる
             AuthorRepository.select(it)
         }
+        //joinedCirclesにあるIDが存在するIDか確認する
+        joinedCircles.forEach{
+            //もし存在しなければEntityNotFoundExceptionが投げられる
+            CircleRepository.select(it)
+        }
         //Authorをインサート
         val id = AuthorRepository.insert(name, memo)
         //AuthorAliasを登録
         updateAuthorAliases(id, authorAlias)
+        //joinedCirclesを登録
+        updateJoinedCircles(id, joinedCircles)
         return id
     }
 
@@ -43,6 +52,21 @@ class AuthorServiceLogic {
              .forEach{
                  AuthorAliasRepository.delete(it.key)
              }
+    }
+
+    fun updateJoinedCircles(authorId: Int, joinedCircles: List<Int>){
+        //authorIdに紐づく既存の参加サークル一覧を取得
+        val circles = AuthorRepository.select(authorId).joinedCircles.map { it.id }
+        //登録されていない場合は追加
+        joinedCircles.filter { !circles.contains(it)}
+            .forEach{
+                MAuthorCircleRepository.insert(authorId, it)
+            }
+        //joinedCirclesにないものがあれば削除
+        circles.filter { !joinedCircles.contains(it) }
+            .forEach {
+                MAuthorCircleRepository.delete(authorId, it)
+            }
     }
 
     fun updateAuthor(id: Int, name: String, memo: String, authorAlias: List<Int>): Int{

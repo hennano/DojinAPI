@@ -6,6 +6,10 @@ import org.jetbrains.exposed.dao.with
 
 object CircleRepository {
 
+    fun select(id: Int, resoleDepth: Int = 1): Circle {
+        return CircleEntity[id].toModel(resoleDepth)
+    }
+
     fun selectAll(resoleDepth: Int = 1):List<Circle>{
         return CircleEntity.all().with(CircleEntity::members).map { it.toModel(resoleDepth) }
     }

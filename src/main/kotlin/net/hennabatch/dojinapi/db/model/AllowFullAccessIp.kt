@@ -5,7 +5,7 @@ import java.net.InetAddress
 
 data class AllowFullAccessIp (
     val id: Int,
-    val ip: InetAddress,
+    //val ip: InetAddress,
     val createdAt: LocalDateTime?,
     val updatedAt: LocalDateTime?,
 )

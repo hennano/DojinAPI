@@ -13,7 +13,8 @@ class AuthorRequestEntityTest: FunSpec({
             val entity = AuthorRequestEntity(
                 name = "なまえ",
                 memo = "testmemo",
-                authorAlias = listOf(1, 2)
+                authorAlias = listOf(1, 2),
+                joinedCircles = listOf(1, 2)
             )
 
             //実行
@@ -29,7 +30,8 @@ class AuthorRequestEntityTest: FunSpec({
             val entity = AuthorRequestEntity(
                 name = "なまえ",
                 memo = "",
-                authorAlias = listOf()
+                authorAlias = listOf(),
+                joinedCircles = listOf()
             )
 
             //実行
@@ -49,7 +51,8 @@ class AuthorRequestEntityTest: FunSpec({
             val entity = AuthorRequestEntity(
                 name = "",
                 memo = "testmemo",
-                authorAlias = listOf(1, 2)
+                authorAlias = listOf(1, 2),
+                joinedCircles = listOf(1, 2)
             )
 
             //実行
@@ -65,7 +68,8 @@ class AuthorRequestEntityTest: FunSpec({
             val entity = AuthorRequestEntity(
                 name = "なまえ",
                 memo = null,
-                authorAlias = listOf(1, 2)
+                authorAlias = listOf(1, 2),
+                joinedCircles = listOf(1, 2)
             )
 
             //実行
@@ -76,6 +80,10 @@ class AuthorRequestEntityTest: FunSpec({
             res.reason shouldBeEqual "memoがない"
         }
         test("異常系_author_aliasが存在しない"){
+            println("ありえないケース")
+        }
+
+        test("異常系_joined_circlesが存在しない"){
             println("ありえないケース")
         }
     }

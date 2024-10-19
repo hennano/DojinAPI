@@ -24,7 +24,7 @@ class AuthorService: KoinComponent {
 
     suspend fun postAuthor(requestEntity: AuthorRequestEntity): JsonObject{
         return db.dbQuery {
-            val id = authorServiceLogic.insertAuthor(name = requestEntity.name!!, memo = requestEntity.memo!!, authorAlias = requestEntity.authorAlias!!)
+            val id = authorServiceLogic.insertAuthor(name = requestEntity.name, memo = requestEntity.memo?: "", authorAlias = requestEntity.authorAlias, joinedCircles = requestEntity.joinedCircles)
             return@dbQuery authorResponse.makeAuthorCreated(id, requestEntity.name)
         }
     }
