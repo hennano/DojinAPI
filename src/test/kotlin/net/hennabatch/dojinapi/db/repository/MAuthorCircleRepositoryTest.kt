@@ -20,7 +20,7 @@ class MAuthorCircleRepositoryTest: FunSpec({
     val pass = "localuserpass"
     val db = HikariCpDb()
 
-    beforeTest {
+    beforeSpec {
         db.connect(jdbcUrl, userName, pass)
     }
 
