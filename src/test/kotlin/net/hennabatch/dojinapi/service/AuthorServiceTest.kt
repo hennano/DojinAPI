@@ -17,17 +17,19 @@ import kotlinx.datetime.*
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
+import net.hennabatch.dojinapi.common.utils.logger
 import net.hennabatch.dojinapi.controller.request.AuthorRequestEntity
 import net.hennabatch.dojinapi.db.CommonDb
 import net.hennabatch.dojinapi.db.TestableHikariCpDb
 import net.hennabatch.dojinapi.logic.AuthorServiceLogic
-import net.hennabatch.dojinapi.testutils.TestFlags.disableDBAccess
+import net.hennabatch.dojinapi.testutils.TestFlags.enableDBAccess
 import net.hennabatch.dojinapi.views.AuthorResponse
 import org.jetbrains.exposed.dao.exceptions.EntityNotFoundException
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.statements.StatementInterceptor
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.junit.jupiter.api.assertThrows
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -41,7 +43,7 @@ class AuthorServiceTest: FunSpec({
     val db = TestableHikariCpDb()
     var rollBackDetector: StatementInterceptor?
 
-    beforeTest{
+    beforeSpec{
         db.connect(jdbcUrl, userName, pass)
     }
 
@@ -67,7 +69,7 @@ class AuthorServiceTest: FunSpec({
     }
 
     context("getAuthors"){
-        test("正常系_データ0件").config(enabledOrReasonIf = disableDBAccess){
+        test("正常系_データ0件").config(enabledOrReasonIf = enableDBAccess){
             //実行
             val res = runBlocking {
                 AuthorService().getAuthors()
@@ -77,7 +79,7 @@ class AuthorServiceTest: FunSpec({
             res shouldBeEqual JsonObject(mapOf())
         }
 
-        test("正常系_データ1件").config(enabledOrReasonIf = disableDBAccess){
+        test("正常系_データ1件").config(enabledOrReasonIf = enableDBAccess){
             //準備
             val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
@@ -96,7 +98,7 @@ class AuthorServiceTest: FunSpec({
             ))
         }
 
-        test("正常系_データ10件").config(enabledOrReasonIf = disableDBAccess){
+        test("正常系_データ10件").config(enabledOrReasonIf = enableDBAccess){
             //準備
             val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
@@ -126,7 +128,7 @@ class AuthorServiceTest: FunSpec({
             ))
         }
 
-        test("異常系_AuthorServiceLogicでエラー").config(enabledOrReasonIf = disableDBAccess){
+        test("異常系_AuthorServiceLogicでエラー").config(enabledOrReasonIf = enableDBAccess){
             //準備
             val authorServiceLogicMock = mockk<AuthorServiceLogic>{
                 every { fetchAllAuthors()} throws Exception()
@@ -164,7 +166,7 @@ class AuthorServiceTest: FunSpec({
             isRollBack.shouldBeTrue()
         }
 
-        test("異常系_AuthorResponseでエラー").config(enabledOrReasonIf = disableDBAccess){
+        test("異常系_AuthorResponseでエラー").config(enabledOrReasonIf = enableDBAccess){
             //準備
             val authorResponseMock = mockk<AuthorResponse>{
                 every { makeAuthorListFetched(any())} throws Exception()
@@ -200,7 +202,7 @@ class AuthorServiceTest: FunSpec({
     }
 
     context("postAuthor"){
-        test("正常系_最小").config(enabledOrReasonIf = disableDBAccess){
+        test("正常系_最小").config(enabledOrReasonIf = enableDBAccess){
             //実行
             val request = AuthorRequestEntity(
                 name = "test1",
@@ -222,7 +224,7 @@ class AuthorServiceTest: FunSpec({
             assertAuthor(Integer.parseInt(id), "test1", "", result[0])
         }
 
-        test("正常系_すべて").config(enabledOrReasonIf = disableDBAccess){
+        test("正常系_すべて").config(enabledOrReasonIf = enableDBAccess){
             //準備
             val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
@@ -262,7 +264,7 @@ class AuthorServiceTest: FunSpec({
             assertMAuthorCircle(Integer.parseInt(id), 1, resultMAuthorCircle[0])
         }
 
-        test("異常系_AuthorServiceLogicでエラー").config(enabledOrReasonIf = disableDBAccess){
+        test("異常系_AuthorServiceLogicでエラー").config(enabledOrReasonIf = enableDBAccess){
             //準備
             val authorServiceLogicMock = mockk<AuthorServiceLogic>{
                 every {insertAuthor(any(), any(), any(), any())} throws Exception()
@@ -306,7 +308,7 @@ class AuthorServiceTest: FunSpec({
             isRollBack.shouldBeTrue()
         }
 
-        test("異常系_AuthorResponseでエラー").config(enabledOrReasonIf = disableDBAccess){
+        test("異常系_AuthorResponseでエラー").config(enabledOrReasonIf = enableDBAccess){
             //準備
             val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
@@ -370,7 +372,7 @@ class AuthorServiceTest: FunSpec({
     }
 
     context("getAuthor"){
-        test("正常系_最小").config(enabledOrReasonIf = disableDBAccess){
+        test("正常系_最小").config(enabledOrReasonIf = enableDBAccess){
             //準備
             val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
@@ -395,7 +397,7 @@ class AuthorServiceTest: FunSpec({
             ))
         }
 
-        test("正常系_すべて").config(enabledOrReasonIf = disableDBAccess){
+        test("正常系_すべて").config(enabledOrReasonIf = enableDBAccess){
             //準備
             val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
@@ -428,7 +430,7 @@ class AuthorServiceTest: FunSpec({
             ))
         }
 
-        test("正常系_該当データなし").config(enabledOrReasonIf = disableDBAccess){
+        test("正常系_該当データなし").config(enabledOrReasonIf = enableDBAccess){
             shouldThrow<EntityNotFoundException> {
                 runBlocking {
                     AuthorService().getAuthor(1)
@@ -436,7 +438,7 @@ class AuthorServiceTest: FunSpec({
             }
         }
 
-        test("異常系_AuthorServiceLogicでエラー").config(enabledOrReasonIf = disableDBAccess){
+        test("異常系_AuthorServiceLogicでエラー").config(enabledOrReasonIf = enableDBAccess){
             //準備
             val authorServiceLogicMock = mockk<AuthorServiceLogic>{
                 every { fetchAuthor(any())} throws Exception()
@@ -474,7 +476,7 @@ class AuthorServiceTest: FunSpec({
             isRollBack.shouldBeTrue()
         }
 
-        test("異常系_AuthorResponseでエラー").config(enabledOrReasonIf = disableDBAccess){
+        test("異常系_AuthorResponseでエラー").config(enabledOrReasonIf = enableDBAccess){
             //準備
             val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
@@ -513,60 +515,347 @@ class AuthorServiceTest: FunSpec({
             isRollBack.shouldBeTrue()
         }
     }
-    /*
 
-    //TODO
     context("putAuthor"){
-        test("正常系"){
+        test("正常系_最小").config(enabledOrReasonIf = enableDBAccess){
             //準備
-            val db = spyk<CommonDb>()
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+            }
 
-            val expectedAuthor = Author(1, "test1", null, listOf(), null, null)
+            //実行
+            val request = AuthorRequestEntity(
+                name = "test1",
+                memo = "",
+                authorAlias = listOf(),
+                joinedCircles = listOf()
+            )
+            val res = runBlocking {
+                AuthorService().putAuthor(1, request)
+            }
 
+            //検証
+            res shouldBeEqual JsonObject(mapOf(
+                "1" to JsonPrimitive("test1")
+            ))
+
+            //DB検証
+            val result = execRawSelectQuery("SELECT * from djla.author") // わざと全件取得し、1個だけであることを確認する
+            result shouldHaveSize 1
+            assertAuthor(1, "test1", "", result[0])
+        }
+
+        test("正常系_すべて").config(enabledOrReasonIf = enableDBAccess){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
+            }
+
+            //実行
+            val request = AuthorRequestEntity(
+                name = "test1",
+                memo = "hello",
+                authorAlias = listOf(1),
+                joinedCircles = listOf(1)
+            )
+            val res = runBlocking {
+                AuthorService().putAuthor(1, request)
+            }
+
+            //検証
+            res shouldBeEqual JsonObject(mapOf(
+                "1" to JsonPrimitive("test1")
+            ))
+
+            //DB検証
+            //Authorテーブル
+            val result = execRawSelectQuery("SELECT * from djla.author") // わざと全件取得し、1個だけであることを確認する
+            result shouldHaveSize 1
+            assertAuthor(1, "test1", "hello", result[0])
+            //AuthorAliasテーブル
+            val resultAlias = execRawSelectQuery("SELECT * from djla.author_alias") // わざと全件取得し、1個だけできていることを確認する
+            resultAlias shouldHaveSize 1
+            assertAuthorAlias(1, 1, resultAlias[0])
+            //MAuthorCircleテーブル
+            val resultMAuthorCircle = execRawSelectQuery("SELECT * from djla.m_author_circle") // わざと全件取得し、1個だけできていることを確認する
+            resultMAuthorCircle shouldHaveSize 1
+            assertMAuthorCircle(1, 1, resultMAuthorCircle[0])
+        }
+
+        test("正常系_author_aliasとjoined_circlesを削除").config(enabledOrReasonIf = enableDBAccess){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 1, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, '$strLocalDateTime', '$strLocalDateTime')")
+            }
+
+            //実行
+            val request = AuthorRequestEntity(
+                name = "test1",
+                memo = "",
+                authorAlias = listOf(),
+                joinedCircles = listOf()
+            )
+
+            val res = runBlocking {
+                AuthorService().putAuthor(1, request)
+            }
+
+            //検証
+            res shouldBeEqual JsonObject(mapOf(
+                "1" to JsonPrimitive("test1")
+            ))
+
+            //DB検証
+            //Authorテーブル
+            val result = execRawSelectQuery("SELECT * from djla.author") // わざと全件取得し、1個だけであることを確認する
+            result shouldHaveSize 1
+            assertAuthor(1, "test1", "", result[0])
+            //AuthorAliasテーブル
+            val resultAlias = execRawSelectQuery("SELECT * from djla.author_alias")
+            resultAlias shouldHaveSize 0
+            //MAuthorCircleテーブル
+            val resultMAuthorCircle = execRawSelectQuery("SELECT * from djla.m_author_circle")
+            resultMAuthorCircle shouldHaveSize 0
+        }
+
+        test("正常系_author_aliasとjoined_circlesを追加").config(enabledOrReasonIf = enableDBAccess){
+            logger.info("正常系_すべてで実施")
+        }
+
+        test("正常系_author_aliasとjoined_circlesを編集").config(enabledOrReasonIf = enableDBAccess){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                for(i in 1..4){
+                    TransactionManager.current().exec("INSERT INTO djla.author values ($i, 'testAuthor$i', 'memoAuthor$i', '$strLocalDateTime', '$strLocalDateTime')")
+                }
+                for(i in 1..4){
+                    TransactionManager.current().exec("INSERT INTO djla.circle values ($i, 'testCircle$i', 'memoCircle$i', '$strLocalDateTime', '$strLocalDateTime')")
+                }
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 2, 1, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (2, 4, 1, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 2, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 4, '$strLocalDateTime', '$strLocalDateTime')")
+            }
+
+            //実行
+            val request = AuthorRequestEntity(
+                name = "test1",
+                memo = "hello",
+                authorAlias = listOf(2,3),
+                joinedCircles = listOf(2,3)
+            )
+
+            val res = runBlocking {
+                AuthorService().putAuthor(1, request)
+            }
+
+            //検証
+            res shouldBeEqual JsonObject(mapOf(
+                "1" to JsonPrimitive("test1")
+            ))
+
+            //DB検証
+            //Authorテーブル
+            val result = execRawSelectQuery("SELECT * from djla.author WHERE id = 1")
+            result shouldHaveSize 1
+            assertAuthor(1, "test1", "hello", result[0])
+            //AuthorAliasテーブル
+            val resultAlias = execRawSelectQuery("SELECT * from djla.author_alias")// わざと全件取得し、2個だけであることを確認する
+            resultAlias shouldHaveSize 2
+            assertAuthorAlias(2, 1, resultAlias[0])
+            assertAuthorAlias(1, 3, resultAlias[1])
+            //MAuthorCircleテーブル
+            val resultMAuthorCircle = execRawSelectQuery("SELECT * from djla.m_author_circle")// わざと全件取得し、2個だけであることを確認する
+            resultMAuthorCircle shouldHaveSize 2
+            assertMAuthorCircle(1, 2, resultMAuthorCircle[0])
+            assertMAuthorCircle(1, 3, resultMAuthorCircle[1])
+        }
+
+        test("正常系_存在しないid").config(enabledOrReasonIf = enableDBAccess){
+            //実行
+            val request = AuthorRequestEntity(
+                name = "test1",
+                memo = "",
+                authorAlias = listOf(),
+                joinedCircles = listOf()
+            )
+
+            assertThrows<EntityNotFoundException> {
+                runBlocking {
+                    AuthorService().putAuthor(1, request)
+                }
+            }
+
+        }
+
+        test("正常系_author_aliasで存在しないidを指定").config(enabledOrReasonIf = enableDBAccess){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+            }
+
+            //実行
+            val request = AuthorRequestEntity(
+                name = "test1",
+                memo = "",
+                authorAlias = listOf(2),
+                joinedCircles = listOf()
+            )
+            assertThrows<EntityNotFoundException> {
+                runBlocking {
+                    AuthorService().putAuthor(1, request)
+                }
+            }
+        }
+
+        test("正常系_joined_circlesで存在しないidを指定").config(enabledOrReasonIf = enableDBAccess){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+            }
+
+            //実行
+            val request = AuthorRequestEntity(
+                name = "test1",
+                memo = "",
+                authorAlias = listOf(),
+                joinedCircles = listOf(2)
+            )
+            assertThrows<EntityNotFoundException> {
+                runBlocking {
+                    AuthorService().putAuthor(1, request)
+                }
+            }
+        }
+
+        test("異常系_AuthorServiceLogicでエラー").config(enabledOrReasonIf = enableDBAccess){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+            }
+            //準備
             val authorServiceLogicMock = mockk<AuthorServiceLogic>{
-                every { updateAuthor(any(), any(), any(), any())} returns expectedAuthor.id
+                every { updateAuthor(any(), any(), any(), any(), any())} throws Exception()
             }
 
-            val resJson = JsonObject(mapOf())
-            val authorResponseMock = mockk<AuthorResponse>{
-                every { makeAuthorUpdated(any(), any()) } returns resJson
-
+            var isRollBack = false
+            rollBackDetector = registerDetectionRollBack {
+                isRollBack = true
             }
+            db.statementInterceptors.add(rollBackDetector!!)
+
+            stopKoin()
             startKoin {
                 modules(module{
                     single<CommonDb>{db}
                     single<AuthorServiceLogic>{authorServiceLogicMock}
+                    single<AuthorResponse>{AuthorResponse()}
+                })
+            }
+
+            //実行
+            val request = AuthorRequestEntity(
+                name = "test1",
+                memo = "",
+                authorAlias = listOf(),
+                joinedCircles = listOf()
+            )
+            shouldThrowAny{
+                runBlocking {
+                    AuthorService().putAuthor(1, request)
+                }
+            }
+
+            //実行確認
+            verify(exactly = 1) {
+                authorServiceLogicMock.updateAuthor(any(), any(), any(), any(), any())
+            }
+            confirmVerified(authorServiceLogicMock)
+
+            //ロールバック検知
+            isRollBack.shouldBeTrue()
+
+            //DB検証
+            val result = execRawSelectQuery("SELECT * from djla.author") // わざと全件取得し、1個だけであることを確認する
+            result shouldHaveSize 1
+            assertAuthor(1, "testAuthor", "memoAuthor1", result[0])
+        }
+
+        test("異常系_AuthorResponseでエラー").config(enabledOrReasonIf = enableDBAccess){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorUpdated(any(), any())} throws Exception()
+            }
+            var isRollBack = false
+            rollBackDetector = registerDetectionRollBack {
+                isRollBack = true
+            }
+            db.statementInterceptors.add(rollBackDetector!!)
+
+            stopKoin()
+            startKoin {
+                modules(module{
+                    single<CommonDb>{db}
+                    single<AuthorServiceLogic>{AuthorServiceLogic()}
                     single<AuthorResponse>{authorResponseMock}
                 })
             }
 
             //実行
-            val res = runBlocking {
-                AuthorService().putAuthor(1, AuthorRequestEntity("test1", null, listOf()))
+            val request = AuthorRequestEntity(
+                name = "test1",
+                memo = "hello",
+                authorAlias = listOf(1),
+                joinedCircles = listOf(1)
+            )
+            shouldThrowAny{
+                runBlocking {
+                    AuthorService().putAuthor(1, request)
+                }
             }
 
-            //検証
-            res shouldBeEqual resJson
-
             verify(exactly = 1) {
-                authorServiceLogicMock.fetchAuthor(1)
-            }
-            confirmVerified(authorServiceLogicMock)
-            verify(exactly = 1) {
-                authorResponseMock.makeAuthorFetched(expectedAuthor, listOf())
+                authorResponseMock.makeAuthorUpdated(any(), any())
             }
             confirmVerified(authorResponseMock)
-        }
+            isRollBack.shouldBeTrue()
 
-        test("異常系_異常系_AuthorServiceLogicでエラー"){
-
-        }
-
-        test("異常系_AuthorResponseでエラー"){
-
+            //DB検証
+            val result = execRawSelectQuery("SELECT * from djla.author") // わざと全件取得し、1個だけであることを確認する
+            result shouldHaveSize 1
+            assertAuthor(1, "testAuthor", "memoAuthor1", result[0])
+            //AuthorAliasテーブル
+            val resultAlias = execRawSelectQuery("SELECT * from djla.author_alias")
+            resultAlias shouldHaveSize 0
+            //MAuthorCircleテーブル
+            val resultMAuthorCircle = execRawSelectQuery("SELECT * from djla.m_author_circle")
+            resultMAuthorCircle shouldHaveSize 0
         }
     }
-     */
 })
 
 //トランザクションロールバックを検知

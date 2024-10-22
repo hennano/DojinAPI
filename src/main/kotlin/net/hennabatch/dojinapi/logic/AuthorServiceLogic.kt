@@ -69,7 +69,7 @@ class AuthorServiceLogic {
             }
     }
 
-    fun updateAuthor(id: Int, name: String, memo: String, authorAlias: List<Int>): Int{
+    fun updateAuthor(id: Int, name: String, memo: String, authorAlias: List<Int>, joinedCircles: List<Int>): Int{
         //Authorが存在するか確認
         //もし存在しなければEntityNotFoundExceptionが投げられる
         AuthorRepository.select(id)
@@ -78,13 +78,19 @@ class AuthorServiceLogic {
             //もし存在しなければEntityNotFoundExceptionが投げられる
             AuthorRepository.select(it)
         }
+        //joinedCirclesにあるIDが存在するIDか確認する
+        joinedCircles.forEach{
+            //もし存在しなければEntityNotFoundExceptionが投げられる
+            CircleRepository.select(it)
+        }
         //Authorをupdate
         AuthorRepository.update(id, name, memo)
 
         //AuthorAliasを登録
         updateAuthorAliases(id, authorAlias)
+        //joinedCirclesを登録
+        updateJoinedCircles(id, joinedCircles)
         return id
-
     }
 
     fun deleteAuthor(id: Int): Boolean{

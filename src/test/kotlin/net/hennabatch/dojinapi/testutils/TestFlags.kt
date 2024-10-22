@@ -7,7 +7,7 @@ import net.hennabatch.dojinapi.common.utils.logger
 object TestFlags {
 
     //DBアクセスを伴うテストはフラグをOnにしないと実行できない
-    val disableDBAccess: (TestCase) -> Enabled = {
+    val enableDBAccess: (TestCase) -> Enabled = {
         logger.info("runDBAccessTest = ${System.getenv("runDBAccessTest")}")
         if (System.getenv("runDBAccessTest")?.toBoolean() == true){
             Enabled.enabled
