@@ -20,4 +20,10 @@ object MAuthorCircleRepository {
                     (MAuthorCircleTable.circleId eq circleId)
         } > 0
     }
+
+    fun deletesByAuthorId(authorId: Int): Int{
+        return MAuthorCircleTable.deleteWhere {
+            MAuthorCircleTable.authorId eq authorId
+        }
+    }
 }

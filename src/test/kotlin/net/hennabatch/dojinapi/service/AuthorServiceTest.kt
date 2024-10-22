@@ -856,6 +856,170 @@ class AuthorServiceTest: FunSpec({
             resultMAuthorCircle shouldHaveSize 0
         }
     }
+
+    context("deleteAuthor"){
+        test("正常系_最小").config(enabledOrReasonIf = enableDBAccess){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+            }
+
+            val res = runBlocking {
+                AuthorService().deleteAuthor(1)
+            }
+
+            //検証
+            res shouldBeEqual JsonObject(mapOf())
+
+            //DB検証
+            val result = execRawSelectQuery("SELECT * from djla.author") // わざと全件取得し、1個だけであることを確認する
+            result shouldHaveSize 0
+        }
+
+        test("正常系_すべて").config(enabledOrReasonIf = enableDBAccess){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 1, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, '$strLocalDateTime', '$strLocalDateTime')")
+            }
+
+            val res = runBlocking {
+                AuthorService().deleteAuthor(1)
+            }
+
+            //検証
+            res shouldBeEqual JsonObject(mapOf())
+
+            //DB検証
+            //Authorテーブル
+            val result = execRawSelectQuery("SELECT * from djla.author")
+            result shouldHaveSize 0
+            //AuthorAliasテーブル
+            val resultAlias = execRawSelectQuery("SELECT * from djla.author_alias")
+            resultAlias shouldHaveSize 0
+            //MAuthorCircleテーブル
+            val resultMAuthorCircle = execRawSelectQuery("SELECT * from djla.m_author_circle")
+            resultMAuthorCircle shouldHaveSize 0
+        }
+
+        test("正常系_存在しないid").config(enabledOrReasonIf = enableDBAccess){
+            assertThrows<EntityNotFoundException> {
+                runBlocking {
+                    AuthorService().deleteAuthor(1)
+                }
+            }
+        }
+
+        test("異常系_AuthorServiceLogicでエラー").config(enabledOrReasonIf = enableDBAccess){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+            }
+            //準備
+            val authorServiceLogicMock = mockk<AuthorServiceLogic>{
+                every { deleteAuthor(any())} throws Exception()
+            }
+
+            var isRollBack = false
+            rollBackDetector = registerDetectionRollBack {
+                isRollBack = true
+            }
+            db.statementInterceptors.add(rollBackDetector!!)
+
+            stopKoin()
+            startKoin {
+                modules(module{
+                    single<CommonDb>{db}
+                    single<AuthorServiceLogic>{authorServiceLogicMock}
+                    single<AuthorResponse>{AuthorResponse()}
+                })
+            }
+
+            //実行
+            shouldThrowAny{
+                runBlocking {
+                    AuthorService().deleteAuthor(1)
+                }
+            }
+
+            //実行確認
+            verify(exactly = 1) {
+                authorServiceLogicMock.deleteAuthor(any())
+            }
+            confirmVerified(authorServiceLogicMock)
+
+            //ロールバック検知
+            isRollBack.shouldBeTrue()
+
+            //DB検証
+            val result = execRawSelectQuery("SELECT * from djla.author") // わざと全件取得し、1個だけであることを確認する
+            result shouldHaveSize 1
+            assertAuthor(1, "testAuthor", "memoAuthor1", result[0])
+        }
+
+        test("異常系_AuthorResponseでエラー").config(enabledOrReasonIf = enableDBAccess){
+            //準備
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 1, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, '$strLocalDateTime', '$strLocalDateTime')")
+            }
+            val authorResponseMock = mockk<AuthorResponse>{
+                every { makeAuthorDeleted(any())} throws Exception()
+            }
+            var isRollBack = false
+            rollBackDetector = registerDetectionRollBack {
+                isRollBack = true
+            }
+            db.statementInterceptors.add(rollBackDetector!!)
+
+            stopKoin()
+            startKoin {
+                modules(module{
+                    single<CommonDb>{db}
+                    single<AuthorServiceLogic>{AuthorServiceLogic()}
+                    single<AuthorResponse>{authorResponseMock}
+                })
+            }
+
+            //実行
+            shouldThrowAny{
+                runBlocking {
+                    AuthorService().deleteAuthor(1)
+                }
+            }
+
+            verify(exactly = 1) {
+                authorResponseMock.makeAuthorDeleted(any())
+            }
+            confirmVerified(authorResponseMock)
+            isRollBack.shouldBeTrue()
+
+            //DB検証
+            val result = execRawSelectQuery("SELECT * from djla.author") // わざと全件取得し、1個だけであることを確認する
+            result shouldHaveSize 1
+            assertAuthor(1, "testAuthor", "memoAuthor1", result[0])
+            //AuthorAliasテーブル
+            val resultAlias = execRawSelectQuery("SELECT * from djla.author_alias") // わざと全件取得し、1個だけできていることを確認する
+            resultAlias shouldHaveSize 1
+            assertAuthorAlias(1, 1, resultAlias[0])
+            //MAuthorCircleテーブル
+            val resultMAuthorCircle = execRawSelectQuery("SELECT * from djla.m_author_circle") // わざと全件取得し、1個だけできていることを確認する
+            resultMAuthorCircle shouldHaveSize 1
+            assertMAuthorCircle(1, 1, resultMAuthorCircle[0])
+        }
+    }
 })
 
 //トランザクションロールバックを検知
