@@ -37,3 +37,6 @@ out/
 
 ### node ###
 docs/api/node_modules/
+
+### docker ###
+dev/minio/
