@@ -10,4 +10,6 @@ object OriginalClosureTable: CompositeIdTable("original_closure") {
     val parentId = reference("parent_id", OriginalTable)
     val childId = reference("child_id", OriginalTable)
     val createdAt = datetime("created_at").clientDefault { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()) }.nullable()
+
+    override val primaryKey = PrimaryKey(parentId, childId)
 }
