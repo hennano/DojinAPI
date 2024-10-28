@@ -16,7 +16,7 @@ object Module {
 
         //Logic
         singleOf(::AuthorServiceLogic)
-        singleOf(::CircleControllerLogic)
+        singleOf(::CircleServiceLogic)
 
         //Views
         singleOf(::AuthorResponse)

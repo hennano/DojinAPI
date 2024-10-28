@@ -8,7 +8,7 @@ import net.hennabatch.dojinapi.db.repository.AuthorAliasRepository
 import net.hennabatch.dojinapi.db.repository.AuthorRepository
 import net.hennabatch.dojinapi.db.repository.MAuthorCircleRepository
 
-class AuthorControllerLogicTest : FunSpec({
+class AuthorServiceLogicTest : FunSpec({
 
     afterEach {
         unmockkAll()
