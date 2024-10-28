@@ -18,13 +18,13 @@ class EventEntity (id: EntityID<Int>) : IntEntity(id)  {
     val createdAt by EventTable.createdAt
     val updatedAt by EventTable.updatedAt
 
-    fun toModel(): Event = Event(
+    fun toModel(resoleDepth: Int = 1): Event = Event(
         id = id.value,
         name = name,
         memo = memo,
         heldAt = heldAt,
         location = location,
-        eventSeries = eventSeriesId.first().toModel(),
+        eventSeries = eventSeriesId.first().toModel(resoleDepth - 1),
         createdAt = createdAt,
         updatedAt = updatedAt
     )

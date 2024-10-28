@@ -2,12 +2,10 @@ package net.hennabatch.dojinapi.db.model
 
 import kotlinx.datetime.LocalDateTime
 
-data class Original (
-    val id: Int,
-    val name: String?,
+data class BookMark(
+    val book: Book,
+    val page: Int,
     val memo: String?,
-    val parents: List<Original>,
-    val children: List<Original>,
     val createdAt: LocalDateTime?,
     val updatedAt: LocalDateTime?,
 )

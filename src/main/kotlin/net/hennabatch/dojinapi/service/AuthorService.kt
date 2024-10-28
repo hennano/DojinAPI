@@ -32,7 +32,7 @@ class AuthorService: KoinComponent {
     suspend fun getAuthor(authorId: Int):JsonObject{
         return db.dbQuery {
             val authorDetail = authorServiceLogic.fetchAuthor(authorId)
-            return@dbQuery authorResponse.makeAuthorFetched(authorDetail.first, authorDetail.second)
+            return@dbQuery authorResponse.makeAuthorFetched(authorDetail)
         }
     }
 

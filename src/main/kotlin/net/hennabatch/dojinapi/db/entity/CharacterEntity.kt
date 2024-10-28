@@ -16,11 +16,11 @@ class CharacterEntity(id: EntityID<Int>): IntEntity(id) {
     val createdAt by CharacterTable.createdAt
     val updatedAt by CharacterTable.updatedAt
 
-    fun toModel(): Character = Character(
+    fun toModel(resoleDepth: Int = 1): Character = Character(
         id = id.value,
         name = name,
         memo = memo,
-        original = original.first().toModel(),
+        original = original.first().toModel(resoleDepth - 1),
         createdAt = createdAt,
         updatedAt = updatedAt
     )

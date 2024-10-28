@@ -1,6 +1,7 @@
 package net.hennabatch.dojinapi.db.entity
 
 import net.hennabatch.dojinapi.db.model.Author
+import net.hennabatch.dojinapi.db.table.AuthorAliasTable
 import net.hennabatch.dojinapi.db.table.AuthorTable
 import net.hennabatch.dojinapi.db.table.MAuthorCircleTable
 import org.jetbrains.exposed.dao.IntEntity
@@ -12,6 +13,7 @@ class AuthorEntity(id: EntityID<Int>) : IntEntity(id){
 
     val name by AuthorTable.name
     val memo by AuthorTable.memo
+    val alias by AuthorEntity.via(AuthorAliasTable.authorId2, AuthorAliasTable.authorId1)
     val joinedCircles by CircleEntity via MAuthorCircleTable
     val createdAt by AuthorTable.createdAt
     val updatedAt by AuthorTable.updatedAt
@@ -20,6 +22,7 @@ class AuthorEntity(id: EntityID<Int>) : IntEntity(id){
         id = id.value,
         name = name,
         memo = memo,
+        alias = if(resoleDepth > 0) alias.map { it.toModel(resoleDepth - 1) }.toList() else listOf(),
         joinedCircles = if(resoleDepth > 0) joinedCircles.map { it.toModel(resoleDepth - 1) }.toList() else listOf(),
         createdAt = createdAt,
         updatedAt = updatedAt

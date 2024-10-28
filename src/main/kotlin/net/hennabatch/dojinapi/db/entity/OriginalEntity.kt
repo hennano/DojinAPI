@@ -1,6 +1,7 @@
 package net.hennabatch.dojinapi.db.entity
 
 import net.hennabatch.dojinapi.db.model.Original
+import net.hennabatch.dojinapi.db.table.OriginalClosureTable
 import net.hennabatch.dojinapi.db.table.OriginalTable
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
@@ -11,7 +12,8 @@ class OriginalEntity (id: EntityID<Int>) : IntEntity(id) {
 
     val name by OriginalTable.name
     val memo by OriginalTable.memo
-    val parentOriginalId by OriginalEntity via OriginalTable
+    val parents by OriginalEntity.via(OriginalClosureTable.childId, OriginalClosureTable.parentId)
+    val children by OriginalEntity.via(OriginalClosureTable.parentId, OriginalClosureTable.childId)
     val createdAt by OriginalTable.createdAt
     val updatedAt by OriginalTable.updatedAt
 
@@ -19,7 +21,8 @@ class OriginalEntity (id: EntityID<Int>) : IntEntity(id) {
         id = id.value,
         name = name,
         memo = memo,
-        parentOriginal = if(resoleDepth > 0) parentOriginalId.first().toModel(resoleDepth - 1) else null,
+        parents = if(resoleDepth > 0) parents.map { it.toModel(resoleDepth - 1) }.toList() else listOf(),
+        children = if(resoleDepth > 0) children.map { it.toModel(resoleDepth - 1) }.toList() else listOf(),
         createdAt = createdAt,
         updatedAt = updatedAt
     )

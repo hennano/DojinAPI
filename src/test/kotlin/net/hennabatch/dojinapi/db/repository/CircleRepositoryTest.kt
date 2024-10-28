@@ -30,6 +30,7 @@ class CircleRepositoryTest: FunSpec({
         transaction {
             TransactionManager.current().exec("DELETE FROM djla.m_author_circle")
             TransactionManager.current().exec("DELETE FROM djla.author_alias")
+            TransactionManager.current().exec("DELETE FROM djla.circle_alias")
             TransactionManager.current().exec("DELETE FROM djla.author")
             TransactionManager.current().exec("DELETE FROM djla.circle")
         }
@@ -50,7 +51,7 @@ class CircleRepositoryTest: FunSpec({
             }
 
             //検証
-            val expected = Circle(1, "test1", "memomemo1", listOf(), localDateTime, localDateTime)
+            val expected = Circle(1, "test1", "memomemo1", listOf(), listOf(), localDateTime, localDateTime)
 
             res shouldBeEqual expected
         }
@@ -72,6 +73,7 @@ class CircleRepositoryTest: FunSpec({
             //検証
             res.name?.shouldBeEqual("testCircle")
             res.memo?.shouldBeEqual("memoCircle1")
+            res.alias.shouldBeEmpty()
             res.createdAt?.shouldBeEqual(localDateTime)
             res.updatedAt?.shouldBeEqual(localDateTime)
             res.members shouldHaveSize 1
@@ -82,22 +84,34 @@ class CircleRepositoryTest: FunSpec({
             res.members[0].updatedAt?.shouldBeEqual(localDateTime)
         }
 
-        test("データあり_resolveDepth1_authorなし"){
+        test("データあり_resolveDepth1_aliasあり"){
             //準備
             val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
             transaction {
-                TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'test1', 'memomemo1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle1', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.circle values (2, 'testCircle2', 'memoCircle2', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.circle_alias values (1, 2, '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.circle_alias values (2, 1, '$strLocalDateTime')")
             }
 
             //実行
             val res = db.dbQuery{
-                CircleRepository.select(1, 0)
+                CircleRepository.select(1, 1)
             }
 
             //検証
-            val expected = Circle(1, "test1", "memomemo1", listOf(), localDateTime, localDateTime)
-            res shouldBeEqual expected
+            res.name?.shouldBeEqual("testCircle1")
+            res.memo?.shouldBeEqual("memoCircle1")
+            res.createdAt?.shouldBeEqual(localDateTime)
+            res.updatedAt?.shouldBeEqual(localDateTime)
+            res.members.shouldBeEmpty()
+            res.alias shouldHaveSize 1
+            res.alias[0].name?.shouldBeEqual("testCircle2")
+            res.alias[0].memo?.shouldBeEqual("memoCircle2")
+            res.alias[0].alias.shouldBeEmpty()
+            res.alias[0].createdAt?.shouldBeEqual(localDateTime)
+            res.alias[0].updatedAt?.shouldBeEqual(localDateTime)
         }
 
         test("データなし"){
@@ -126,9 +140,9 @@ class CircleRepositoryTest: FunSpec({
             }
 
             //検証
-            val expected1 = Circle(1, "test1", "memomemo1", listOf(), localDateTime, localDateTime)
-            val expected2 = Circle(2, "test2", "memomemo2", listOf(), localDateTime, localDateTime)
-            val expected3 = Circle(3, "test3", "memomemo3", listOf(), localDateTime, localDateTime)
+            val expected1 = Circle(1, "test1", "memomemo1", listOf(), listOf(), localDateTime, localDateTime)
+            val expected2 = Circle(2, "test2", "memomemo2", listOf(), listOf(), localDateTime, localDateTime)
+            val expected3 = Circle(3, "test3", "memomemo3", listOf(), listOf(), localDateTime, localDateTime)
 
             circles shouldHaveSize 3
             circles shouldContain expected1

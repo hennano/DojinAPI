@@ -13,7 +13,8 @@ class BookSeriesEntity(id: EntityID<Int>): IntEntity(id) {
     val createdAt by BookSeriesTable.createdAt
     val updatedAt by BookSeriesTable.updatedAt
 
-    fun toModel(): BookSeries = BookSeries(
+    //他のものと合わせるためにresoleDepthを入れているが使ってない
+    fun toModel(resoleDepth: Int = 1): BookSeries = BookSeries(
         id = id.value,
         name = name,
         createdAt = createdAt,

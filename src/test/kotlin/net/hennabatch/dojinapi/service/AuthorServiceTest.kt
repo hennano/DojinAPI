@@ -230,6 +230,7 @@ class AuthorServiceTest: FunSpec({
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
             transaction {
                 TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (2, 'testAuthor', 'memoAuthor2', '$strLocalDateTime', '$strLocalDateTime')")
                 TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
             }
 
@@ -237,7 +238,7 @@ class AuthorServiceTest: FunSpec({
             val request = AuthorRequestEntity(
                 name = "test1",
                 memo = "hello",
-                authorAlias = listOf(1),
+                authorAlias = listOf(2),
                 joinedCircles = listOf(1)
             )
             val res = runBlocking {
@@ -256,8 +257,10 @@ class AuthorServiceTest: FunSpec({
             assertAuthor(Integer.parseInt(id), "test1", "hello", resultAuthor[0])
             //AuthorAliasテーブル
             val resultAlias = execRawSelectQuery("SELECT * from djla.author_alias") // わざと全件取得し、1個だけできていることを確認する
-            resultAlias shouldHaveSize 1
-            assertAuthorAlias(Integer.parseInt(id), 1, resultAlias[0])
+            resultAlias shouldHaveSize 3
+            assertAuthorAlias(Integer.parseInt(id), Integer.parseInt(id), resultAlias[0])
+            assertAuthorAlias(Integer.parseInt(id), 2, resultAlias[1])
+            assertAuthorAlias(2, Integer.parseInt(id), resultAlias[2])
             //MAuthorCircleテーブル
             val resultMAuthorCircle = execRawSelectQuery("SELECT * from djla.m_author_circle") // わざと全件取得し、1個だけできていることを確認する
             resultMAuthorCircle shouldHaveSize 1
@@ -404,9 +407,11 @@ class AuthorServiceTest: FunSpec({
             transaction {
                 TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor1', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
                 TransactionManager.current().exec("INSERT INTO djla.author values (2, 'testAuthor2', 'memoAuthor2', '$strLocalDateTime', '$strLocalDateTime')")
-                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 2, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 2, '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (2, 1, '$strLocalDateTime')")
                 TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
-                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, '$strLocalDateTime')")
             }
 
             //実行
@@ -423,6 +428,7 @@ class AuthorServiceTest: FunSpec({
                     "1" to JsonPrimitive("testCircle")
                 )),
                 "author_alias" to JsonObject(mapOf(
+                    "1" to JsonPrimitive("testAuthor1"),
                     "2" to JsonPrimitive("testAuthor2")
                 )),
                 "created_at" to JsonPrimitive(strLocalDateTime),
@@ -484,7 +490,7 @@ class AuthorServiceTest: FunSpec({
                 TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
             }
             val authorResponseMock = mockk<AuthorResponse>{
-                every { makeAuthorFetched(any(), any())} throws Exception()
+                every { makeAuthorFetched(any())} throws Exception()
             }
             var isRollBack = false
             rollBackDetector = registerDetectionRollBack {
@@ -509,7 +515,7 @@ class AuthorServiceTest: FunSpec({
             }
 
             verify(exactly = 1) {
-                authorResponseMock.makeAuthorFetched(any(), any())
+                authorResponseMock.makeAuthorFetched(any())
             }
             confirmVerified(authorResponseMock)
             isRollBack.shouldBeTrue()
@@ -552,7 +558,9 @@ class AuthorServiceTest: FunSpec({
             val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
             transaction {
-                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor1', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (2, 'testAuthor2', 'memoAuthor2', '$strLocalDateTime', '$strLocalDateTime')")
                 TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
             }
 
@@ -560,7 +568,7 @@ class AuthorServiceTest: FunSpec({
             val request = AuthorRequestEntity(
                 name = "test1",
                 memo = "hello",
-                authorAlias = listOf(1),
+                authorAlias = listOf(2),
                 joinedCircles = listOf(1)
             )
             val res = runBlocking {
@@ -574,13 +582,16 @@ class AuthorServiceTest: FunSpec({
 
             //DB検証
             //Authorテーブル
-            val result = execRawSelectQuery("SELECT * from djla.author") // わざと全件取得し、1個だけであることを確認する
-            result shouldHaveSize 1
+            val result = execRawSelectQuery("SELECT * from djla.author ORDER BY id ASC") // わざと全件取得し、2個だけであることを確認する
+            result shouldHaveSize 2
             assertAuthor(1, "test1", "hello", result[0])
+            assertAuthor(2, "testAuthor2", "memoAuthor2", result[1])
             //AuthorAliasテーブル
             val resultAlias = execRawSelectQuery("SELECT * from djla.author_alias") // わざと全件取得し、1個だけできていることを確認する
-            resultAlias shouldHaveSize 1
+            resultAlias shouldHaveSize 3
             assertAuthorAlias(1, 1, resultAlias[0])
+            assertAuthorAlias(1, 2, resultAlias[1])
+            assertAuthorAlias(2, 1, resultAlias[2])
             //MAuthorCircleテーブル
             val resultMAuthorCircle = execRawSelectQuery("SELECT * from djla.m_author_circle") // わざと全件取得し、1個だけできていることを確認する
             resultMAuthorCircle shouldHaveSize 1
@@ -593,9 +604,12 @@ class AuthorServiceTest: FunSpec({
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
             transaction {
                 TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (2, 'testAuthor2', 'memoAuthor2', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 2, '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (2, 1, '$strLocalDateTime')")
                 TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
-                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 1, '$strLocalDateTime', '$strLocalDateTime')")
-                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, '$strLocalDateTime')")
             }
 
             //実行
@@ -617,12 +631,14 @@ class AuthorServiceTest: FunSpec({
 
             //DB検証
             //Authorテーブル
-            val result = execRawSelectQuery("SELECT * from djla.author") // わざと全件取得し、1個だけであることを確認する
-            result shouldHaveSize 1
+            val result = execRawSelectQuery("SELECT * from djla.author ORDER BY id ASC") // わざと全件取得し、2個だけであることを確認する
+            result shouldHaveSize 2
             assertAuthor(1, "test1", "", result[0])
+            assertAuthor(2, "testAuthor2", "memoAuthor2", result[1])
             //AuthorAliasテーブル
             val resultAlias = execRawSelectQuery("SELECT * from djla.author_alias")
-            resultAlias shouldHaveSize 0
+            resultAlias shouldHaveSize 1
+            assertAuthorAlias(1, 1, resultAlias[0])
             //MAuthorCircleテーブル
             val resultMAuthorCircle = execRawSelectQuery("SELECT * from djla.m_author_circle")
             resultMAuthorCircle shouldHaveSize 0
@@ -639,14 +655,17 @@ class AuthorServiceTest: FunSpec({
             transaction {
                 for(i in 1..4){
                     TransactionManager.current().exec("INSERT INTO djla.author values ($i, 'testAuthor$i', 'memoAuthor$i', '$strLocalDateTime', '$strLocalDateTime')")
+                    TransactionManager.current().exec("INSERT INTO djla.author_alias values ($i, $i, '$strLocalDateTime')")
                 }
                 for(i in 1..4){
                     TransactionManager.current().exec("INSERT INTO djla.circle values ($i, 'testCircle$i', 'memoCircle$i', '$strLocalDateTime', '$strLocalDateTime')")
                 }
-                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 2, 1, '$strLocalDateTime', '$strLocalDateTime')")
-                TransactionManager.current().exec("INSERT INTO djla.author_alias values (2, 4, 1, '$strLocalDateTime', '$strLocalDateTime')")
-                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 2, '$strLocalDateTime', '$strLocalDateTime')")
-                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 4, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 2, '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (2, 1, '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 4, '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (4, 1, '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 2, '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 4, '$strLocalDateTime')")
             }
 
             //実行
@@ -672,10 +691,16 @@ class AuthorServiceTest: FunSpec({
             result shouldHaveSize 1
             assertAuthor(1, "test1", "hello", result[0])
             //AuthorAliasテーブル
-            val resultAlias = execRawSelectQuery("SELECT * from djla.author_alias")// わざと全件取得し、2個だけであることを確認する
-            resultAlias shouldHaveSize 2
-            assertAuthorAlias(2, 1, resultAlias[0])
-            assertAuthorAlias(1, 3, resultAlias[1])
+            val resultAlias = execRawSelectQuery("SELECT * from djla.author_alias")
+            resultAlias shouldHaveSize 8
+            assertAuthorAlias(1, 1, resultAlias[0])
+            assertAuthorAlias(2, 2, resultAlias[1])
+            assertAuthorAlias(3, 3, resultAlias[2])
+            assertAuthorAlias(4, 4, resultAlias[3])
+            assertAuthorAlias(1, 2, resultAlias[4])
+            assertAuthorAlias(2, 1, resultAlias[5])
+            assertAuthorAlias(1, 3, resultAlias[6])
+            assertAuthorAlias(3, 1, resultAlias[7])
             //MAuthorCircleテーブル
             val resultMAuthorCircle = execRawSelectQuery("SELECT * from djla.m_author_circle")// わざと全件取得し、2個だけであることを確認する
             resultMAuthorCircle shouldHaveSize 2
@@ -805,6 +830,7 @@ class AuthorServiceTest: FunSpec({
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
             transaction {
                 TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (2, 'testAuthor2', 'memoAuthor2', '$strLocalDateTime', '$strLocalDateTime')")
                 TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
             }
             val authorResponseMock = mockk<AuthorResponse>{
@@ -829,7 +855,7 @@ class AuthorServiceTest: FunSpec({
             val request = AuthorRequestEntity(
                 name = "test1",
                 memo = "hello",
-                authorAlias = listOf(1),
+                authorAlias = listOf(2),
                 joinedCircles = listOf(1)
             )
             shouldThrowAny{
@@ -845,9 +871,10 @@ class AuthorServiceTest: FunSpec({
             isRollBack.shouldBeTrue()
 
             //DB検証
-            val result = execRawSelectQuery("SELECT * from djla.author") // わざと全件取得し、1個だけであることを確認する
-            result shouldHaveSize 1
+            val result = execRawSelectQuery("SELECT * from djla.author  ORDER BY id ASC") // わざと全件取得し、2個だけであることを確認する
+            result shouldHaveSize 2
             assertAuthor(1, "testAuthor", "memoAuthor1", result[0])
+            assertAuthor(2, "testAuthor2", "memoAuthor2", result[1])
             //AuthorAliasテーブル
             val resultAlias = execRawSelectQuery("SELECT * from djla.author_alias")
             resultAlias shouldHaveSize 0
@@ -885,8 +912,8 @@ class AuthorServiceTest: FunSpec({
             transaction {
                 TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
                 TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
-                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 1, '$strLocalDateTime', '$strLocalDateTime')")
-                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, '$strLocalDateTime')")
             }
 
             val res = runBlocking {
@@ -972,8 +999,8 @@ class AuthorServiceTest: FunSpec({
             transaction {
                 TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
                 TransactionManager.current().exec("INSERT INTO djla.circle values (1, 'testCircle', 'memoCircle1', '$strLocalDateTime', '$strLocalDateTime')")
-                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, 1, '$strLocalDateTime', '$strLocalDateTime')")
-                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 1, '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.m_author_circle values (1, 1, '$strLocalDateTime')")
             }
             val authorResponseMock = mockk<AuthorResponse>{
                 every { makeAuthorDeleted(any())} throws Exception()
@@ -1062,7 +1089,6 @@ private fun assertAuthorAlias(authorId1: Int, authorId2: Int, actual: Map<String
     Integer.parseInt(actual["author_id_2"].toString()) shouldBe authorId2
     //substring(0, 23)はナノ秒切り捨て用
     LocalDateTime.parse(actual["created_at"].toString().replace(" ", "T")) shouldBeBefore Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    LocalDateTime.parse(actual["updated_at"].toString().replace(" ", "T")) shouldBeBefore Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 }
 
 private fun assertMAuthorCircle(authorId: Int, circleId: Int, actual: Map<String, Any?>){
@@ -1070,5 +1096,4 @@ private fun assertMAuthorCircle(authorId: Int, circleId: Int, actual: Map<String
     Integer.parseInt(actual["circle_id"].toString()) shouldBe circleId
     //substring(0, 23)はナノ秒切り捨て用
     LocalDateTime.parse(actual["created_at"].toString().replace(" ", "T")) shouldBeBefore Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    LocalDateTime.parse(actual["updated_at"].toString().replace(" ", "T")) shouldBeBefore Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 }

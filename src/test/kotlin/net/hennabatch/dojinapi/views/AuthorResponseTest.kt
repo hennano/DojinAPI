@@ -10,7 +10,6 @@ import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import net.hennabatch.dojinapi.db.model.Author
-import net.hennabatch.dojinapi.db.model.AuthorAlias
 import net.hennabatch.dojinapi.db.model.Circle
 import java.time.format.DateTimeFormatter
 
@@ -19,9 +18,9 @@ class AuthorResponseTest : FunSpec({
         test("データあり") {
             //準備
             val authors = listOf(
-                Author(1, "test1", null, listOf(), null, null),
-                Author(2, "test2", null, listOf(), null, null),
-                Author(3, "test3", null, listOf(), null, null)
+                Author(1, "test1", null, listOf(), listOf(), null, null),
+                Author(2, "test2", null, listOf(), listOf(), null, null),
+                Author(3, "test3", null, listOf(), listOf(), null, null)
             )
 
             //実行
@@ -36,9 +35,9 @@ class AuthorResponseTest : FunSpec({
         test("データあり_一部nameカラ") {
             //準備
             val authors = listOf(
-                Author(1, "test1", null, listOf(), null, null),
-                Author(2, null, null, listOf(), null, null),
-                Author(3, "test3", null, listOf(), null, null)
+                Author(1, "test1", null, listOf(), listOf(), null, null),
+                Author(2, null, null, listOf(), listOf(), null, null),
+                Author(3, "test3", null, listOf(), listOf(), null, null)
             )
 
             //実行
@@ -68,10 +67,10 @@ class AuthorResponseTest : FunSpec({
             //準備
             val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
-            val author = Author(1, "author1", "", listOf(), localDateTime, localDateTime)
+            val author = Author(1, "author1", "", listOf(), listOf(), localDateTime, localDateTime)
 
             //実行
-            val res = AuthorResponse().makeAuthorFetched(author, listOf())
+            val res = AuthorResponse().makeAuthorFetched(author)
 
             //検証
             res.shouldContain("id", JsonPrimitive(1))
@@ -86,13 +85,12 @@ class AuthorResponseTest : FunSpec({
         test("データあり_すべて"){
             val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
-            val circle = Circle(1, "circle1", "", listOf(), null, null)
-            val author1 = Author(1, "author1", "memomemo", listOf(circle), localDateTime, localDateTime)
-            val author2 = Author(2, "author2", "", listOf(), null, null)
-            val authorAlias = AuthorAlias(1, author1, author2, null, null)
+            val circle = Circle(1, "circle1", "", listOf(), listOf(), null, null)
+            val author2 = Author(2, "author2", "", listOf(), listOf(), null, null)
+            val author1 = Author(1, "author1", "memomemo", listOf(author2), listOf(circle), localDateTime, localDateTime)
 
             //実行
-            val res = AuthorResponse().makeAuthorFetched(author1, listOf(authorAlias))
+            val res = AuthorResponse().makeAuthorFetched(author1)
 
             //検証
             res.shouldContain("id", JsonPrimitive(1))

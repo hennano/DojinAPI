@@ -6,6 +6,7 @@ data class Circle (
     val id: Int,
     val name: String?,
     val memo: String?,
+    val alias: List<Circle>,
     val members: List<Author>,
     val createdAt: LocalDateTime?,
     val updatedAt: LocalDateTime?,

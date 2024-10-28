@@ -3,7 +3,6 @@ package net.hennabatch.dojinapi.logic
 import io.kotest.core.spec.style.FunSpec
 import io.mockk.*
 import net.hennabatch.dojinapi.db.model.Author
-import net.hennabatch.dojinapi.db.model.AuthorAlias
 import net.hennabatch.dojinapi.db.model.Circle
 import net.hennabatch.dojinapi.db.repository.AuthorAliasRepository
 import net.hennabatch.dojinapi.db.repository.AuthorRepository
@@ -29,133 +28,119 @@ class AuthorControllerLogicTest : FunSpec({
     context("updateAuthorAliases"){
         test("データなし"){
             //準備
-            mockkObject(objects = arrayOf(AuthorAliasRepository), recordPrivateCalls = true)
-            every { AuthorAliasRepository.selectsByAuthorId(any(), any()) } returns listOf()
-            every { AuthorAliasRepository.insert(any(), any()) } returns 1
-            every { AuthorAliasRepository.delete(any())} returns true
+            mockkObject(objects = arrayOf(AuthorAliasRepository, AuthorRepository), recordPrivateCalls = true)
+            every { AuthorRepository.select(any()) } returns Author(1,"test", "memo", listOf(), listOf(), null, null)
+            every { AuthorAliasRepository.matrixInsert(any(), any()) } returns Unit
+            every { AuthorAliasRepository.deletesRelation(any(), any())} returns 0
 
             //実行
             AuthorServiceLogic().updateAuthorAliases(1, listOf())
 
             //検証
             verify(exactly = 1) {
-                AuthorAliasRepository.selectsByAuthorId(1, 0)
+                AuthorRepository.select(1)
             }
-            verify(exactly = 0) {
-                AuthorAliasRepository.insert(any(), any())
+            verify(exactly = 1) {
+                AuthorAliasRepository.matrixInsert(1, listOf())
             }
-            verify(exactly = 0) {
-                AuthorAliasRepository.delete(any())
+            verify(exactly = 1) {
+                AuthorAliasRepository.deletesRelation(1, listOf())
             }
         }
 
         test("データなし_既存を削除"){
             //準備
-            val author1 = Author(1, "test1", "memomemo1", listOf(), null, null)
-            val author2 = Author(2, "test2", "memomemo2", listOf(), null, null)
-            val expected = AuthorAlias(1, author1, author2, null, null)
-            mockkObject(objects = arrayOf(AuthorAliasRepository), recordPrivateCalls = true)
-            every { AuthorAliasRepository.selectsByAuthorId(any(), any()) } returns listOf(
-                expected
-            )
-            every { AuthorAliasRepository.insert(any(), any()) } returns 1
-            every { AuthorAliasRepository.delete(any())} returns true
+            val aliasAuthor = Author(2, "test2", "memomemo2", listOf(), listOf(), null, null)
+            val author = Author(1, "test1", "memomemo1", listOf(aliasAuthor), listOf(), null, null)
+            mockkObject(objects = arrayOf(AuthorAliasRepository, AuthorRepository), recordPrivateCalls = true)
+            every { AuthorRepository.select(1) } returns author
+            every { AuthorAliasRepository.matrixInsert(any(), any()) } returns Unit
+            every { AuthorAliasRepository.deletesRelation(any(), any())} returns 1
 
             //実行
             AuthorServiceLogic().updateAuthorAliases(1, listOf())
 
             //検証
             verify(exactly = 1) {
-                AuthorAliasRepository.selectsByAuthorId(1, 0)
-            }
-            verify(exactly = 0) {
-                AuthorAliasRepository.insert(any(), any())
+                AuthorRepository.select(1)
             }
             verify(exactly = 1) {
-                AuthorAliasRepository.delete(1)
+                AuthorAliasRepository.matrixInsert(1, listOf())
+            }
+            verify(exactly = 1) {
+                AuthorAliasRepository.deletesRelation(1, listOf(2))
             }
         }
 
         test("データ1つ"){
             //準備
-            mockkObject(objects = arrayOf(AuthorAliasRepository), recordPrivateCalls = true)
-            every { AuthorAliasRepository.selectsByAuthorId(any(), any()) } returns listOf()
-            every { AuthorAliasRepository.insert(any(), any()) } returns 1
-            every { AuthorAliasRepository.delete(any())} returns true
+            mockkObject(objects = arrayOf(AuthorAliasRepository, AuthorRepository), recordPrivateCalls = true)
+            every { AuthorRepository.select(any()) } returns Author(1,"test", "memo", listOf(), listOf(), null, null)
+            every { AuthorAliasRepository.matrixInsert(any(), any()) } returns Unit
+            every { AuthorAliasRepository.deletesRelation(any(), any())} returns 0
 
             //実行
             AuthorServiceLogic().updateAuthorAliases(1, listOf(2))
 
             //検証
             verify(exactly = 1) {
-                AuthorAliasRepository.selectsByAuthorId(1, 0)
+                AuthorRepository.select(1)
             }
             verify(exactly = 1) {
-                AuthorAliasRepository.insert(1, 2)
+                AuthorAliasRepository.matrixInsert(1, listOf(2))
             }
-            verify(exactly = 0) {
-                AuthorAliasRepository.delete(1)
+            verify(exactly = 1) {
+                AuthorAliasRepository.deletesRelation(1, listOf())
             }
         }
 
         test("データ1つ_すでにあるデータと重複"){
             //準備
-            val author1 = Author(1, "test1", "memomemo1", listOf(), null, null)
-            val author2 = Author(2, "test2", "memomemo2", listOf(), null, null)
-            val expected = AuthorAlias(1, author1, author2, null, null)
-            mockkObject(objects = arrayOf(AuthorAliasRepository), recordPrivateCalls = true)
-            every { AuthorAliasRepository.selectsByAuthorId(any(), any()) } returns listOf(
-                expected
-            )
-            every { AuthorAliasRepository.insert(any(), any()) } returns 1
-            every { AuthorAliasRepository.delete(any())} returns true
+            val aliasAuthor = Author(2, "test2", "memomemo2", listOf(), listOf(), null, null)
+            val author = Author(1, "test1", "memomemo1", listOf(aliasAuthor), listOf(), null, null)
+            mockkObject(objects = arrayOf(AuthorAliasRepository, AuthorRepository), recordPrivateCalls = true)
+            every { AuthorRepository.select(any()) } returns author
+            every { AuthorAliasRepository.matrixInsert(any(), any()) } returns Unit
+            every { AuthorAliasRepository.deletesRelation(any(), any())} returns 0
 
             //実行
             AuthorServiceLogic().updateAuthorAliases(1, listOf(2))
 
             //検証
             verify(exactly = 1) {
-                AuthorAliasRepository.selectsByAuthorId(1, 0)
+                AuthorRepository.select(1)
             }
-            verify(exactly = 0) {
-                AuthorAliasRepository.insert(any(), any())
+            verify(exactly = 1) {
+                AuthorAliasRepository.matrixInsert(1, listOf())
             }
-            verify(exactly = 0) {
-                AuthorAliasRepository.delete(any())
+            verify(exactly = 1) {
+                AuthorAliasRepository.deletesRelation(1, listOf())
             }
             confirmVerified(AuthorAliasRepository)
         }
 
         test("データ複数"){
             //準備
-            val author1 = Author(1, "test1", "memomemo1", listOf(), null, null)
-            val author2 = Author(2, "test2", "memomemo2", listOf(), null, null)
-            val author4 = Author(4, "test2", "memomemo2", listOf(), null, null)
-            val expected1 = AuthorAlias(1, author1, author2, null, null)
-            val expected2 = AuthorAlias(2, author1, author4, null, null)
-            mockkObject(objects = arrayOf(AuthorAliasRepository), recordPrivateCalls = true)
-            every { AuthorAliasRepository.selectsByAuthorId(any(), any()) } returns listOf(
-                expected1,
-                expected2
-            )
-            every { AuthorAliasRepository.insert(any(), any()) } returns 1
-            every { AuthorAliasRepository.delete(any())} returns true
+            val author2 = Author(2, "test2", "memomemo2", listOf(), listOf(), null, null)
+            val author4 = Author(4, "test4", "memomemo4", listOf(), listOf(), null, null)
+            val author1 = Author(1, "test1", "memomemo1", listOf(author2, author4), listOf(), null, null)
+            mockkObject(objects = arrayOf(AuthorAliasRepository, AuthorRepository), recordPrivateCalls = true)
+            every { AuthorRepository.select(any()) } returns author1
+            every { AuthorAliasRepository.matrixInsert(any(), any()) } returns Unit
+            every { AuthorAliasRepository.deletesRelation(any(), any())} returns 1
 
             //実行
             AuthorServiceLogic().updateAuthorAliases(1, listOf(2, 3))
 
             //検証
             verify(exactly = 1) {
-                AuthorAliasRepository.selectsByAuthorId(1, 0)
-            }
-            verify(exactly = 0) {
-                AuthorAliasRepository.insert(1, 2)
+                AuthorRepository.select(1)
             }
             verify(exactly = 1) {
-                AuthorAliasRepository.insert(1, 3)
+                AuthorAliasRepository.matrixInsert(1, listOf(3))
             }
             verify(exactly = 1) {
-                AuthorAliasRepository.delete(2)
+                AuthorAliasRepository.deletesRelation(1, listOf(4))
             }
             confirmVerified(AuthorAliasRepository)
         }
@@ -165,7 +150,7 @@ class AuthorControllerLogicTest : FunSpec({
         test("データなし"){
             //準備
             mockkObject(objects = arrayOf(AuthorRepository, MAuthorCircleRepository), recordPrivateCalls = true)
-            every { AuthorRepository.select(any(), any()) } returns Author(1,"test", "memo", listOf(), null, null)
+            every { AuthorRepository.select(any(), any()) } returns Author(1,"test", "memo", listOf(), listOf(), null, null)
             every { MAuthorCircleRepository.insert(any(), any()) } returns Unit
             every { MAuthorCircleRepository.delete(any(), any())} returns true
 
@@ -186,7 +171,7 @@ class AuthorControllerLogicTest : FunSpec({
 
         test("データなし_既存を削除"){
             mockkObject(objects = arrayOf(AuthorRepository, MAuthorCircleRepository), recordPrivateCalls = true)
-            every { AuthorRepository.select(any(), any()) } returns Author(1,"test", "memo", listOf(Circle(1, "test", "test", listOf(), null, null)), null, null)
+            every { AuthorRepository.select(any(), any()) } returns Author(1,"test", "memo", listOf(), listOf(Circle(1, "test", "test", listOf(), listOf(), null, null)), null, null)
             every { MAuthorCircleRepository.insert(any(), any()) } returns Unit
             every { MAuthorCircleRepository.delete(any(), any())} returns true
 
@@ -208,7 +193,7 @@ class AuthorControllerLogicTest : FunSpec({
         test("データ1つ"){
             //準備
             mockkObject(objects = arrayOf(AuthorRepository, MAuthorCircleRepository), recordPrivateCalls = true)
-            every { AuthorRepository.select(any(), any()) } returns Author(1,"test", "memo", listOf(), null, null)
+            every { AuthorRepository.select(any(), any()) } returns Author(1,"test", "memo", listOf(), listOf(), null, null)
             every { MAuthorCircleRepository.insert(any(), any()) } returns Unit
             every { MAuthorCircleRepository.delete(any(), any())} returns true
 
@@ -230,7 +215,7 @@ class AuthorControllerLogicTest : FunSpec({
         test("データ1つ_すでにあるデータと重複"){
             //準備
             mockkObject(objects = arrayOf(AuthorRepository, MAuthorCircleRepository), recordPrivateCalls = true)
-            every { AuthorRepository.select(any(), any()) } returns Author(1,"test", "memo", listOf(Circle(1, "test", "test", listOf(), null, null)), null, null)
+            every { AuthorRepository.select(any(), any()) } returns Author(1,"test", "memo", listOf(), listOf(Circle(1, "test", "test", listOf(), listOf(), null, null)), null, null)
             every { MAuthorCircleRepository.insert(any(), any()) } returns Unit
             every { MAuthorCircleRepository.delete(any(), any())} returns true
 
@@ -252,10 +237,10 @@ class AuthorControllerLogicTest : FunSpec({
         test("データ複数"){
             //準備
             mockkObject(objects = arrayOf(AuthorRepository, MAuthorCircleRepository), recordPrivateCalls = true)
-            every { AuthorRepository.select(any(), any()) } returns Author(1,"test1", "memo1", listOf(
-                Circle(1, "test1", "test1", listOf(), null, null),
-                Circle(2, "test2", "test2", listOf(), null, null),
-                Circle(4, "test4", "test4", listOf(), null, null)
+            every { AuthorRepository.select(any(), any()) } returns Author(1,"test1", "memo1", listOf(), listOf(
+                Circle(1, "test1", "test1", listOf(), listOf(), null, null),
+                Circle(2, "test2", "test2", listOf(), listOf(), null, null),
+                Circle(4, "test4", "test4", listOf(), listOf(), null, null)
             ), null, null)
             every { MAuthorCircleRepository.insert(any(), any()) } returns Unit
             every { MAuthorCircleRepository.delete(any(), any())} returns true

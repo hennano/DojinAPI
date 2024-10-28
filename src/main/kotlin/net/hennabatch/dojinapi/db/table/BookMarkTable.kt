@@ -6,10 +6,12 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.dao.id.CompositeIdTable
 import org.jetbrains.exposed.sql.kotlin.datetime.datetime
 
-object MBookCharacterTable: CompositeIdTable("m_book_character") {
+object BookMarkTable: CompositeIdTable("bookmark")  {
     val bookId = reference("book_id", BookTable)
-    val characterId = reference("character_id", CharacterTable)
+    val page = integer("page")
+    val memo = text("memo").nullable()
     val createdAt = datetime("created_at").clientDefault { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()) }.nullable()
+    val updatedAt = datetime("updated_at").clientDefault { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()) }.nullable()
 
-    override val primaryKey = PrimaryKey(bookId, characterId)
+    override val primaryKey = PrimaryKey(bookId, page)
 }

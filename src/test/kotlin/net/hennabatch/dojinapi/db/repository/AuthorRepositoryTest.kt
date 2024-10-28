@@ -52,8 +52,27 @@ class AuthorRepositoryTest: FunSpec({
             }
 
             //検証
-            val expected = Author(1, "test1", "memomemo1", listOf(), localDateTime, localDateTime)
+            val expected = Author(1, "test1", "memomemo1", listOf(), listOf(), localDateTime, localDateTime)
             res shouldBeEqual expected
+        }
+
+        test("データあり_resolveDepth1"){
+            val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
+            val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
+            transaction {
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+            }
+            //実行
+            val res = db.dbQuery{
+                AuthorRepository.select(1, 1)
+            }
+
+            res.name?.shouldBeEqual("testAuthor")
+            res.memo?.shouldBeEqual("memoAuthor1")
+            res.alias.shouldBeEmpty()
+            res.createdAt?.shouldBeEqual(localDateTime)
+            res.updatedAt?.shouldBeEqual(localDateTime)
+            res.joinedCircles.shouldBeEmpty()
         }
 
         test("データあり_resolveDepth1_circleあり"){
@@ -72,6 +91,7 @@ class AuthorRepositoryTest: FunSpec({
             //検証
             res.name?.shouldBeEqual("testAuthor")
             res.memo?.shouldBeEqual("memoAuthor1")
+            res.alias.shouldBeEmpty()
             res.createdAt?.shouldBeEqual(localDateTime)
             res.updatedAt?.shouldBeEqual(localDateTime)
             res.joinedCircles shouldHaveSize 1
@@ -82,11 +102,14 @@ class AuthorRepositoryTest: FunSpec({
             res.joinedCircles[0].updatedAt?.shouldBeEqual(localDateTime)
         }
 
-        test("データあり_resolveDepth1_circleなし"){
+        test("データあり_resolveDepth1_aliasあり"){
             val localDateTime = LocalDateTime(2024, 5, 2, 16, 20, 30)
             val strLocalDateTime = localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ISO_DATE_TIME)
             transaction {
-                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (1, 'testAuthor1', 'memoAuthor1', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author values (2, 'testAuthor2', 'memoAuthor2', '$strLocalDateTime', '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (1, 2, '$strLocalDateTime')")
+                TransactionManager.current().exec("INSERT INTO djla.author_alias values (2, 1, '$strLocalDateTime')")
             }
             //実行
             val res = db.dbQuery{
@@ -94,11 +117,18 @@ class AuthorRepositoryTest: FunSpec({
             }
 
             //検証
-            res.name?.shouldBeEqual("testAuthor")
+            res.name?.shouldBeEqual("testAuthor1")
             res.memo?.shouldBeEqual("memoAuthor1")
+            res.joinedCircles.shouldBeEmpty()
             res.createdAt?.shouldBeEqual(localDateTime)
             res.updatedAt?.shouldBeEqual(localDateTime)
-            res.joinedCircles.shouldBeEmpty()
+            res.alias shouldHaveSize 1
+            res.alias[0].name?.shouldBeEqual("testAuthor2")
+            res.alias[0].memo?.shouldBeEqual("memoAuthor2")
+            res.alias[0].joinedCircles.shouldBeEmpty()
+            res.alias[0].alias.shouldBeEmpty()
+            res.alias[0].createdAt?.shouldBeEqual(localDateTime)
+            res.alias[0].updatedAt?.shouldBeEqual(localDateTime)
         }
 
         test("データなし"){
@@ -128,9 +158,9 @@ class AuthorRepositoryTest: FunSpec({
             }
 
             //検証
-            val expected1 = Author(1, "test1", "memomemo1", listOf(), localDateTime, localDateTime)
-            val expected2 = Author(2, "test2", "memomemo2", listOf(), localDateTime, localDateTime)
-            val expected3 = Author(3, "test3", "memomemo3", listOf(), localDateTime, localDateTime)
+            val expected1 = Author(1, "test1", "memomemo1", listOf(), listOf(), localDateTime, localDateTime)
+            val expected2 = Author(2, "test2", "memomemo2", listOf(), listOf(), localDateTime, localDateTime)
+            val expected3 = Author(3, "test3", "memomemo3", listOf(), listOf(), localDateTime, localDateTime)
 
             authors shouldHaveSize 3
             authors shouldContain expected1
@@ -170,6 +200,7 @@ class AuthorRepositoryTest: FunSpec({
 
             res.name?.shouldBeEqual(name)
             res.memo?.shouldBeEqual(memo)
+            res.alias.shouldBeEmpty()
             res.joinedCircles.shouldBeEmpty()
             res.createdAt?.shouldBeAfter(now.toLocalDateTime(TimeZone.currentSystemDefault()))
             res.updatedAt?.shouldBeAfter(now.toLocalDateTime(TimeZone.currentSystemDefault()))

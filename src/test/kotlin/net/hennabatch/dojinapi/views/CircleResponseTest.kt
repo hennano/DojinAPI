@@ -9,13 +9,13 @@ import kotlinx.serialization.json.JsonPrimitive
 import net.hennabatch.dojinapi.db.model.Circle
 
 class CircleResponseTest : FunSpec({
-    context("makeACircleListFetched"){
+    context("makeCircleListFetched"){
         test("正常系"){
             //準備
             val circles = listOf(
-                Circle(1, "test1", null, listOf(), null, null),
-                Circle(2, "test2", null, listOf(), null, null),
-                Circle(3, "test3", null, listOf(), null, null)
+                Circle(1, "test1", null, listOf(), listOf(),null, null),
+                Circle(2, "test2", null, listOf(), listOf(),null, null),
+                Circle(3, "test3", null, listOf(), listOf(),null, null)
             )
 
             //実行
@@ -31,9 +31,9 @@ class CircleResponseTest : FunSpec({
         test("正常系_一部nameカラ"){
             //準備
             val circles = listOf(
-                Circle(1, "test1", null, listOf(), null, null),
-                Circle(2, null, null, listOf(), null, null),
-                Circle(3, "test3", null, listOf(), null, null)
+                Circle(1, "test1", null, listOf(), listOf(), null, null),
+                Circle(2, null, null, listOf(), listOf(), null, null),
+                Circle(3, "test3", null, listOf(), listOf(), null, null)
             )
 
             //実行
