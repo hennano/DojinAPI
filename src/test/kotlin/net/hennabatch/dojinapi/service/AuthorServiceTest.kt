@@ -47,6 +47,15 @@ class AuthorServiceTest: FunSpec({
         db.connect(jdbcUrl, userName, pass)
     }
 
+    afterSpec{
+        transaction {
+            TransactionManager.current().exec("DELETE FROM djla.author_alias")
+            TransactionManager.current().exec("DELETE FROM djla.m_author_circle")
+            TransactionManager.current().exec("DELETE FROM djla.author")
+            TransactionManager.current().exec("DELETE FROM djla.circle")
+        }
+    }
+
     beforeEach{
         startKoin {
             modules(module{
